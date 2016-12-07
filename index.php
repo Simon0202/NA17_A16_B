@@ -5,27 +5,37 @@
     <title>Dashboard</title>
     <style type="text/css" media="screen"></style>
   </head>
-  <body>    
-    <div class="main_page">
-      <h1 id="leTitre">Dashboard</h1>
-      <h1 id="leTitreModule">Créer utilisateur</h1>
-      <form method="GET" action="index.php">
-        <label for="emailUtilisateur">Email : </label>
-        <input type="text" size="20" id ="emailUtilisateur" name="emailUtilisateur"><br/>
-        <label for="emailUtilisateur">Nom : </label>
-        <input type="text" size="20" id ="nomUtilisateur" name="nomUtilisateur"/><br/>
-        <label for="emailUtilisateur">Prenom : </label>
-        <input type="text" size="20" id="prenomUtilisateur" name="prenomUtilisateur"/><br/>
-        <label for="emailUtilisateur">Entreprise : </label>
-        <input type="text" size="20" id="entrepriseUtilisateur" name="entrepriseUtilisateur"/><br/>
-        <label for="emailUtilisateur">Genre : </label>
-        <input type="text" size="20" id="genreUtilisateur" name="genreUtilisateur"/><br/>
-        <label for="emailUtilisateur">Pays : </label>
-        <input type="text" size="20" id="paysUtilisateur" name="paysUtilisateur"/><br/>
-        <label for="emailUtilisateur">Metier : </label>
-        <input type="text" size="20" id="metierUtilisateur" name="metierUtilisateur"/><br/>
-        <input type="submit"/>
-      </form>
+  <body>
+    <h1 id="leTitre">Dashboard</h1>
+    <div id="connexionWidget">
+    	<h2>Connexion</h2>
+	    <form method="GET" action="index.php">
+	    	<label for="emailUtilisateur">Email : </label>
+	        <input type="text" size="20" id ="emailUtilisateur" name="emailUtilisateur">
+	        <input type="submit"/>
+	    </form>
+	    <a href="homePage.php">Page principale du dashboard - DEV</a>
+    </div>
+    <div id="inscriptionWidget">
+     	<h2 id="leTitreModule">Inscription</h2>
+	    <form method="GET" action="index.php">
+	        <label for="emailUtilisateur">Email : </label>
+	        <input type="text" size="20" id ="emailUtilisateur" name="emailUtilisateur"><br/>
+	        <label for="emailUtilisateur">Nom : </label>
+	        <input type="text" size="20" id ="nomUtilisateur" name="nomUtilisateur"/><br/>
+	        <label for="emailUtilisateur">Prenom : </label>
+	        <input type="text" size="20" id="prenomUtilisateur" name="prenomUtilisateur"/><br/>
+	        <label for="emailUtilisateur">Entreprise : </label>
+	        <input type="text" size="20" id="entrepriseUtilisateur" name="entrepriseUtilisateur"/><br/>
+	        <label for="emailUtilisateur">Genre : </label>
+	        <input type="text" size="20" id="genreUtilisateur" name="genreUtilisateur"/><br/>
+	        <label for="emailUtilisateur">Pays : </label>
+	        <input type="text" size="20" id="paysUtilisateur" name="paysUtilisateur"/><br/>
+	        <label for="emailUtilisateur">Metier : </label>
+	        <input type="text" size="20" id="metierUtilisateur" name="metierUtilisateur"/><br/>
+	        <input type="submit"/>
+	    </form>
+      </div>
       <?php
 
         $link = mysqli_connect('localhost','root','***motDePasse***','dashboard') or die('Error connecting to MySQL server.');
@@ -56,7 +66,6 @@
         } 
         mysql_close();
       ?>
-    </div>
   </body>
 </html>
 

@@ -38,6 +38,8 @@
       </div>
       <?php
 
+        require_once ('connect.php');
+
         $link = mysqli_connect('localhost','root','***motDePasse***','dashboard') or die('Error connecting to MySQL server.');
 
 

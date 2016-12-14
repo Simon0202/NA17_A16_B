@@ -18,7 +18,7 @@
 	        <input type="text" size="20" id ="emailUtilisateurExistant" name="emailUtilisateurExistant">
 	        <input type="submit"/>
 	    </form>
-	    <p>Entrer l'adresse mail d'un utilisateur enregistré (ex: paul@email.com)</p>
+	    <p>Entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>
         <?php
 
             $emailUtilisateurExistant=$_POST['emailUtilisateurExistant'];
@@ -60,6 +60,33 @@
 	        <input type="text" size="20" id="metierUtilisateur" name="metierUtilisateur"/><br/>
 	        <input type="submit"/>
 	    </form>
+        <?php
+            $emailUtilisateur=$_POST['emailUtilisateur'];
+            $nomUtilisateur=$_POST['nomUtilisateur'];
+            $prenomUtilisateur=$_POST['prenomUtilisateur'];
+            $entrepriseUtilisateur=$_POST['entrepriseUtilisateur'];
+            $genreUtilisateur=$_POST['genreUtilisateur'];
+            $paysUtilisateur=$_POST['paysUtilisateur'];
+            $metierUtilisateur=$_POST['metierUtilisateur'];
+            if ($emailUtilisateur){
+                require_once ('connect.php');
+
+                $result = pg_query($bddconn, "INSERT INTO Utilisateur (email, nom, prenom, entreprise, genre, pays, metier) VALUES ('$emailUtilisateur','$nomUtilisateur', '$prenomUtilisateur', '$entrepriseUtilisateur', '$genreUtilisateur', '$paysUtilisateur', '$metierUtilisateur');");
+                //TODO : test de confimation d'ajout à la base
+                $testExist = pg_query($bddconn, "SELECT email FROM utilisateur WHERE utilisateur.email='$emailUtilisateur';");
+                $row = pg_fetch_row($testExist);
+                if (!$row) {
+                    echo "<br/>L'utilisateur n'a pas pu être ajouté ou existe déjà.\n";
+                }
+                else{
+                    echo "<br/>L'utilisateur a été enregistré. Utilisez son adresse mail pour se connecter.\n";
+                }
+                pg_close($bddconn);        
+            }
+            else{
+                echo "<br/>Une adresse mail est nécessaire pour s'inscrire.\n";
+            }
+        ?>
       </div>
   </body>
 </html>

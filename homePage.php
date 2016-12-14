@@ -24,26 +24,9 @@
       <div id="tabGroupes">Groupe 1 : Les auteurs engagés - Type Redacteur<br/>Groupe 2 : Bande de lecteurs - Type Lecteurs<br/></div>
     </div>
     <?php
+        require_once ('connect.php');
 
-      $link = mysqli_connect('localhost','root','***motDePasse***','dashboard') or die('Error connecting to MySQL server.');
-
-
-      $emailUtilisateur=$_GET['emailUtilisateur'];
-      $emailUtilisateur=mysqli_real_escape_string($link, $emailUtilisateur);
-      $nomUtilisateur=$_GET['nomUtilisateur'];
-      $nomUtilisateur=mysqli_real_escape_string($link, $nomUtilisateur);
-      $prenomUtilisateur=$_GET['prenomUtilisateur'];
-      $prenomUtilisateur=mysqli_real_escape_string($link, $prenomUtilisateur);
-      $entrepriseUtilisateur=$_GET['entrepriseUtilisateur'];
-      $entrepriseUtilisateur=mysqli_real_escape_string($link, $entrepriseUtilisateur);
-      $genreUtilisateur=$_GET['genreUtilisateur'];
-      $genreUtilisateur=mysqli_real_escape_string($link, $genreUtilisateur);
-      $paysUtilisateur=$_GET['paysUtilisateur'];
-      $paysUtilisateur=mysqli_real_escape_string($link, $paysUtilisateur);
-      $metierUtilisateur=$_GET['metierUtilisateur'];
-      $metierUtilisateur=mysqli_real_escape_string($link, $metierUtilisateur);
-
-      $result = mysqli_query($link, "INSERT INTO Utilisateur (email, nom, prenom, entreprise, genre, pays, metier) VALUES ('$emailUtilisateur','$nomUtilisateur', '$prenomUtilisateur', '$entrepriseUtilisateur', '$genreUtilisateur', '$paysUtilisateur','$metierUtilisateur');");
+        $result = pg_query($bddconn, "SELECT nom FROM utilisateur WHERE utilisateur.email='$emailUtilisateurExistant';");
 
       if (! $fetch =mysqli_fetch_row($result)) {
         echo "<div>Aucun enregistrement ne correspond\n</div>";

@@ -18,7 +18,6 @@
 	        <input type="text" size="20" id ="emailUtilisateurExistant" name="emailUtilisateurExistant">
 	        <input type="submit"/>
 	    </form>
-	    <p>Entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>
         <?php
 
             $emailUtilisateurExistant=$_POST['emailUtilisateurExistant'];
@@ -29,13 +28,15 @@
                 $row = pg_fetch_row($result);
                 if (!$row) {
                     echo "<br/>Utilisateur inexistant.\n";
+                    echo "<p>Veuillez entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>";
                 }
-                else{
-                    echo "$row[0]";
+                else{                   
+                    echo "Chargement de l'utilisateur: $row[0]";
                     echo "<br />\n";
+
                     $_SESSION["emailUtilisateurCourant"] = $emailUtilisateurExistant;
 
-                    header ("Location: homePage.php");
+                    echo "<meta http-equiv=Refresh content='3; url=homePage.php' />";
                 }
                 pg_close($bddconn);        
             }

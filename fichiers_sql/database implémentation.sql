@@ -1,4 +1,3 @@
-
 CREATE TABLE Utilisateur(
 email VARCHAR(50) PRIMARY KEY,
 nom VARCHAR(20) NOT NULL,

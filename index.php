@@ -30,13 +30,14 @@
                     echo "<br/>Utilisateur inexistant.\n";
                     echo "<p>Veuillez entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>";
                 }
-                else{                   
-                    echo "Chargement de l'utilisateur: $row[0]";
+                else{       
+                    echo "<br/>";            
+                    echo "<b>Chargement de l'utilisateur: $row[0]<b>";
                     echo "<br />\n";
 
                     $_SESSION["emailUtilisateurCourant"] = $emailUtilisateurExistant;
 
-                    echo "<meta http-equiv=Refresh content='3; url=homePage.php' />";
+                    echo "<meta http-equiv=Refresh content='2; url=homePage.php' />";
                 }
                 pg_close($bddconn);        
             }

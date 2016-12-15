@@ -1,5 +1,6 @@
 <?php
   session_start();
+  $mailSession = $_SESSION["emailUtilisateurCourant"];
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -15,6 +16,25 @@
     <h1 id="leTitre">Dashboard</h1>
     <div id="fluxDePublications">
     	<h2>Flux de publications</h2>
+
+    	<?php  
+    		require_once('connect.php');
+
+    		$query="SELECT titre, confidentialite FROM Flux where createur='$mailSession';";
+
+    		$result = pg_query($bddconn, $query);
+echo "<table>";
+echo "<tr><th>Titre</th><th>Confidentialite</th></tr>";
+    		while($row=pg_fetch_array($result)){
+    			
+    			echo "<tr><td>$row[0]<td><td>$row[1]</td><tr>";
+    			
+    		}
+echo "</table>";
+
+
+    	?>
+
       <button>Score croissant/Decroissant</button>
       <button>Date croissant/Decroissant</button>
     </div>

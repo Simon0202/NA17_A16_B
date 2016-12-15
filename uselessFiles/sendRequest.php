@@ -14,6 +14,7 @@
               echo "<tr>";
               echo "<td>Session $fetched[$i]</td>";
               echo "</tr>";
+              test lou/
           }
         }*/
         else {

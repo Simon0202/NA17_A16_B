@@ -37,7 +37,7 @@
 
                     $_SESSION["emailUtilisateurCourant"] = $emailUtilisateurExistant;
 
-                    echo "<meta http-equiv=Refresh content='2; url=homePage.php' />";
+                    echo "<meta http-equiv=Refresh content='0.5; url=homePage.php' />";
                 }
                 pg_close($bddconn);        
             }

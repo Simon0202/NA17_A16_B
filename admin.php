@@ -14,7 +14,7 @@
     <a href="dashboard.php">Dashboard</a>
     <h1 id="leTitre">Administration</h1>
     <div id="vosFluxDePublications" style="background-color:#eae8e4ff">
-    	<h2>Parcourir vos flux de publications</h2>
+    	<h2>Vos flux de publications</h2>
       <div id="listeVosFluxDePublications">
    
       <!--On affiche ici la liste des flux dont l'utilisateur est responsable-->     
@@ -177,8 +177,9 @@
     <!--Module d'affichage et de création de flux-->
     <?php
 
+    $titreFluxAModifier=$_SESSION['fluxSelectionne'];
 
-      if(isset($titreFluxAModifier)){
+    if(isset($titreFluxAModifier)){
         echo "<div id='vosPublications' style='background-color:#eae8e4ff'>
         <h2>$titreFluxAModifier</h2>
         <div id='listeDesPublications'>";

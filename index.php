@@ -21,12 +21,12 @@
         <?php
 
             $emailUtilisateurExistant=$_POST['emailUtilisateurExistant'];
-            if ($emailUtilisateurExistant){
+            if (isset($emailUtilisateurExistant)){
                 require_once ('connect.php');
 
                 $result = pg_query($bddconn, "SELECT nom FROM utilisateur WHERE utilisateur.email='$emailUtilisateurExistant';");
                 $row = pg_fetch_row($result);
-                if (!$row) {
+                if (!isset($row)) {
                     echo "<br/>Utilisateur inexistant.\n";
                     echo "<p>Veuillez entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>";
                 }
@@ -77,7 +77,7 @@
                 //TODO : test de confimation d'ajout à la base
                 $testExist = pg_query($bddconn, "SELECT email FROM utilisateur WHERE utilisateur.email='$emailUtilisateur';");
                 $row = pg_fetch_row($testExist);
-                if (!$row) {
+                if (!isset($row)) {
                     echo "<br/>L'utilisateur n'a pas pu être ajouté ou existe déjà.\n";
                 }
                 else{

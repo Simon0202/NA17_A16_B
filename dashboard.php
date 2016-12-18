@@ -20,20 +20,20 @@
     	<?php  
     		require_once('connect.php');
 
-    		$query="SELECT titre, confidentialite FROM Flux where createur='$mailSession';";
+    		$query="SELECT titre, confidentialite FROM Flux where createur='$mailSession' ORDER BY titre;";
 
     		$result = pg_query($bddconn, $query);
     		
 			echo "<table>";
 			echo "<tr><th>Titre</th><th>Confidentialite</th></tr>";
     		while($row=pg_fetch_array($result)){
-    			echo "<tr><td>$row[0]<td><td>$row[1]</td><tr>";	
+    			echo "<tr><td>$row[0]</td><td>$row[1]</td><tr>";	
     		}
 			echo "</table>";
     	?>
 
-      <button>Score croissant/Decroissant</button>
-      <button>Date croissant/Decroissant</button>
+    <button>Score croissant/Decroissant</button>
+    <button>Date croissant/Decroissant</button>
     </div>
     <div id="listePublications">
       <h2>Publications</h2>

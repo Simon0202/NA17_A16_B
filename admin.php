@@ -147,7 +147,7 @@
         }
 
         if(strcmp($typeModif, 'Enregistrer')==0){
-            $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFluxAModifier' AND createur='$emailRespFlux';");
+            $result = pg_query($bddconn, "UPDATE flux SET createur='$emailRespFlux' WHERE titre='$titreFluxAModifier';");
             echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
         };
 
@@ -155,7 +155,7 @@
             $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreFlux';");
             $testFetched = pg_fetch_row($testExist);
             if(strcmp($row[0], $titreFlux)==0){
-                $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFlux' AND createur='$emailRespFlux';"); 
+                $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFlux';"); 
             }
             else{
                 $result = pg_query($bddconn, "INSERT INTO flux (titre, confidentialite, createur) VALUES ('$titreFlux','$confidentialiteFlux', '$emailRespFlux');");       
@@ -257,7 +257,7 @@
         $mailSession = $_SESSION["emailUtilisateurCourant"];
 
         if (isset($titreGroupeAModifier)){
-            $_SESSION['fluxSelectionne'] = $titreGroupeAModifier;
+            $_SESSION['groupeSelectionne'] = $titreGroupeAModifier;
             if(strcmp($titreFluxAModifier, "nouveau") ==0){
                 echo "<form id='groupeModification' method='POST' action='admin.php'>
                 <h3>Nouveau groupe</h3>
@@ -315,16 +315,16 @@
 
         <?php
 
-        $titreGroupe=$_POST['titreFlux'];
-        $titreGroupeASupprimer=$_POST['titreFluxASupprimer'];
+        $titreGroupe=$_POST['titreGroupe'];
+        $titreGroupeASupprimer=$_POST['titreGroupeASupprimer'];
         $emailRespGroupe=$_POST['emailResponsable'];
         $typeModif=$_POST['typeModif'];
-        $titreFluxAModifier=$_SESSION['fluxSelectionne'];
+        $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
 
-        if(isset($titreFluxASupprimer)){
-            $result = pg_query($bddconn, "DELETE FROM flux WHERE titre='$titreFluxASupprimer';");
+        if(isset($titreGroupeASupprimer)){
+            $result = pg_query($bddconn, "DELETE FROM flux WHERE titre='$titreGroupeASupprimer';");
             if (!isset($row)) {
-                echo "<br/>Le flux n'a pu être supprimé.\n";
+                echo "<br/>Le groupe n'a pu être supprimé.\n";
             }
             else{
                 echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
@@ -332,24 +332,24 @@
 
         }
 
-        if(strcmp($typeModif, 'Enregistrer')==0){
-            $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFluxAModifier' AND createur='$emailRespFlux';");
+        /*if(strcmp($typeModif, 'Enregistrer')==0){
+            $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreGroupeAModifier' AND createur='$emailRespGroupe';");
             echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
-        };
+        };*/
 
-        if(isset($titreFlux)){
-            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreFlux';");
+        if(isset($titreGroupe)){
+            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreGroupe';");
             $testFetched = pg_fetch_row($testExist);
-            if(strcmp($row[0], $titreFlux)==0){
-                $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFlux' AND createur='$emailRespFlux';"); 
+            if(strcmp($row[0], $titreGroupe)==0){
+                $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreGroupe' AND createur='$emailRespGroupe';"); 
             }
             else{
-                $result = pg_query($bddconn, "INSERT INTO flux (titre, confidentialite, createur) VALUES ('$titreFlux','$confidentialiteFlux', '$emailRespFlux');");       
+                $result = pg_query($bddconn, "INSERT INTO flux (titre, confidentialite, createur) VALUES ('$titreGroupe','$confidentialiteFlux', '$emailRespGroupe');");       
             }
-            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreFlux';");
+            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreGroupe';");
             $row = pg_fetch_row($testExist);
             if (!isset($row[0])) {
-                echo "<br/>Le flux n'a pas pu être ajouté.\n";
+                echo "<br/>Le groupe n'a pas pu être ajouté.\n";
             }
             else{
                 echo "<meta http-equiv=Refresh content='0; url=admin.php' />";

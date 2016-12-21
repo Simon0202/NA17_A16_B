@@ -20,7 +20,6 @@
       <!--On affiche ici la liste des flux dont l'utilisateur est responsable-->     
       <?php  
         require_once('connect.php');
-
         $query="SELECT titre, confidentialite FROM Flux where createur='$mailSession' ORDER BY titre;";
 
         $result = pg_query($bddconn, $query);
@@ -92,23 +91,20 @@
                     
                 }  
                 echo "</select>
-                <input name='typeModif' value='Enregistrer' type='submit'/>
-                "; 
+                <input name='typeModif' value='Enregistrer' type='submit'/>"; 
             }
 
             //Création du tableau regroupant les groupes du flux
-            $query="SELECT groupe_utilisateur.email_admin, droits_groupe.redacteur FROM droits_groupe, groupe_utilisateur WHERE droits_groupe_flux.flux='$titreFluxAModifier' AND droits_groupe.id_utilisateur= groupe_utilisateur ORDER BY titre;";
-
-            //$query="SELECT groupe_utilisateur.email_admin, droits_groupe.redacteur FROM droits_groupe, groupe_utilisateur WHERE droits_groupe_flux.flux='$titreFluxAModifier' AND droits_groupe.id_utilisateur= groupe_utilisateur ORDER BY titre;";
+            $query="SELECT nom FROM droits_groupes_flux WHERE nom='$titreFluxAModifier'  ORDER BY nom;";
 
             $result = pg_query($bddconn, $query);
             echo "<h3>Groupes associés</h3>";
             echo "<table>";
-            echo "<tr><th>Email responsable</th><th>Droits</th></tr>";
+            echo "<tr><th>Nom groupe</th><th>Droits</th></tr>";
             while($row=pg_fetch_array($result)){
                 echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
                 echo "<form method='POST' action='admin.php'>";
-                echo "<button name='titreFluxASupprimer' value='$row[0]'>-</button>";
+                echo "<button name='nomGroupeASupprimerDuFlux' value='$row[0]'>-</button>";
                 echo "</form>";
                 echo "</td>";
                 echo "<tr>";
@@ -116,9 +112,9 @@
             echo "</table>";
             echo "<div id='listeGroupesFlux'>
             <label for='emailResponsable'>Ajouter groupe :</label><br/>
-            <input type='text' size='20' id ='emailResponsableGroupe' name='emailResponsableGroupe' value='Mail administrateur'>
-            <button name='ajouterGroupeLecteur'>Lecteur</button>
-            <button name='ajouterGroupeRedacteur'>Redacteur</button>
+            <input type='text' size='20' id ='emailResponsableGroupe' name='nomGroupeAAjouterFlux' value='Nom du groupe'>
+            <button name='ajouterGroupeType' value='lecteur'>Lecteur</button>
+            <button name='ajouterGroupeType' value='redacteur'>Redacteur</button>
             </div>";
 
         }
@@ -131,9 +127,12 @@
         $titreFlux=$_POST['titreFlux'];
         $confidentialiteFlux=$_POST['confidentialiteFlux'];
         $titreFluxASupprimer=$_POST['titreFluxASupprimer'];
+        $nomGroupeAAjouterFlux=$_POST['nomGroupeAAjouterFlux'];
         $emailRespFlux=$_POST['emailResponsable'];
         $typeModif=$_POST['typeModif'];
+        $ajouterGroupeType = $_POST['ajouterGroupeType'];
         $titreFluxAModifier=$_SESSION['fluxSelectionne'];
+
 
         if(isset($titreFluxASupprimer)){
             $result = pg_query($bddconn, "DELETE FROM flux WHERE titre='$titreFluxASupprimer';");
@@ -147,11 +146,12 @@
         }
 
         if(strcmp($typeModif, 'Enregistrer')==0){
-            $result = pg_query($bddconn, "UPDATE flux SET createur='$emailRespFlux' WHERE titre='$titreFluxAModifier';");
+            pg_query($bddconn, "UPDATE flux SET createur='$emailRespFlux' WHERE titre='$titreFluxAModifier';");
+            pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFluxAModifier';");
             echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
         };
-
-        if(isset($titreFlux)){
+        
+        if(isset($titreFlux) && strcmp($typeModif, 'Créer')==0){
             $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreFlux';");
             $testFetched = pg_fetch_row($testExist);
             if(strcmp($row[0], $titreFlux)==0){
@@ -168,6 +168,14 @@
             else{
                 echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
             }
+        }
+
+
+        if(isset($ajouterGroupeType) && strcmp($ajouterGroupeType, 'lecteur')==0){
+            pg_query($bddconn, "INSERT INTO droits_groupes_flux (flux, nom, redacteur) VALUES ('$titreFluxAModifier','$nomGroupeAAjouterFlux', FALSE);");
+        }
+        if(isset($ajouterGroupeType) && strcmp($ajouterGroupeType, 'redacteur')==0){
+            pg_query($bddconn, "INSERT INTO droits_groupes_flux (flux, nom, redacteur) VALUES ('$titreFluxAModifier','$nomGroupeAAjouterFlux', TRUE);");
         }
 
         ?>
@@ -286,7 +294,7 @@
                 "; 
             }
 
-            //Création du tableau regroupant les utilisateurs du flux
+            //Création du tableau regroupant les utilisateurs du groupe
             $query="SELECT groupe_utilisateur.email_admin, droits_groupe.redacteur FROM droits_groupe, groupe_utilisateur WHERE droits_groupe_flux.flux='$titreFluxAModifier' AND droits_groupe.id_utilisateur= groupe_utilisateur ORDER BY titre;";
 
             $result = pg_query($bddconn, $query);

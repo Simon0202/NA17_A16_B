@@ -19,16 +19,15 @@ createur VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Groupe_Utilisateur(
-nom VARCHAR(20),
-id_utilisateur INT PRIMARY KEY,
+nom VARCHAR(20) PRIMARY KEY,
 email_admin VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Droits_Groupes_Flux(
 flux VARCHAR(50) REFERENCES flux(titre),
-id_utilisateur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
+nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
 redacteur BOOLEAN,
-PRIMARY KEY (flux, id_utilisateur)
+PRIMARY KEY (flux, nom)
 );
 
 CREATE TABLE Publication(
@@ -55,7 +54,7 @@ url VARCHAR(50)
 CREATE TABLE Lire(
 lien_publi VARCHAR(50) REFERENCES Publication(lien),
 email VARCHAR(50) REFERENCES Utilisateur(email),
-id_lecteur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
+nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
 PRIMARY KEY (lien_publi, email),
 vote VARCHAR(10) CHECK (vote='like' OR vote='dislike' OR vote='null'),
 commentaire VARCHAR(450)
@@ -63,8 +62,8 @@ commentaire VARCHAR(450)
 
 CREATE TABLE Compo_Groupe(
 email VARCHAR(50) REFERENCES Utilisateur(email),
-id_utilisateur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
-PRIMARY KEY(email, id_utilisateur)
+nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
+PRIMARY KEY(email, nom)
 );
 
 INSERT INTO Utilisateur (email, nom, prenom, entreprise)
@@ -94,42 +93,42 @@ VALUES ('Avions et création','public','michel.durand@email.com'),
 
 
 INSERT INTO Groupe_Utilisateur
-VALUES ('LecteurFlux1',1,'michel.durand@email.com'),		-- 1er Groupe Lecteur du premier flux
-('RedacteurFlux1',2,'michel.durand@email.com'),			-- 1er Groupe Redacteur du premier flux
-('Lecteur2Flux1',3,'micheld@email.com'),					-- 2ème Groupe Lecteur du premier flux
-('LecteurFlux2',4,'michel.durand@email.com'),			-- 1er Groupe Lecteur du second flux
-('RedacteurFlux2',5,'michel.durand@email.com'),				-- 1er Groupe Redacteur du second flux
-('LecteurFlux3',6,'michel.durand@email.com'),			-- 1er Groupe Lecteur du troisième flux
-('RedacteurFlux3',7,'michel.durand@email.com')				-- 1er Groupe Redacteur du troisième flux
+VALUES ('LecteurFlux1','michel.durand@email.com'),		-- 1er Groupe Lecteur du premier flux
+('RedacteurFlux1','michel.durand@email.com'),			-- 1er Groupe Redacteur du premier flux
+('Lecteur2Flux1','micheld@email.com'),					-- 2ème Groupe Lecteur du premier flux
+('LecteurFlux2','michel.durand@email.com'),			-- 1er Groupe Lecteur du second flux
+('RedacteurFlux2','michel.durand@email.com'),				-- 1er Groupe Redacteur du second flux
+('LecteurFlux3','michel.durand@email.com'),			-- 1er Groupe Lecteur du troisième flux
+('RedacteurFlux3','michel.durand@email.com')				-- 1er Groupe Redacteur du troisième flux
 ;
 
 INSERT INTO Droits_Groupes_Flux
-VALUES ('Avions et création',1,FALSE),		-- 1er Groupe Lecteur du premier flux
-('Avions et création',2,TRUE),				-- 1er Groupe Redacteur du premier flux
-('Avions et création',3,FALSE),				-- 2ème Groupe Lecteur du premier flux
-('BDD SQL',4,FALSE),						-- 1er Groupe Lecteur du second flux
-('BDD SQL',5,TRUE),							-- 1er Groupe Redacteur du second flux
-('Programmation objet',6,FALSE),			-- 1er Groupe Lecteur du troisième flux
-('Programmation objet',7,TRUE)				-- 1er Groupe Redacteur du troisième flux
+VALUES ('Avions et création','LecteurFlux1',FALSE),		-- 1er Groupe Lecteur du premier flux
+('Avions et création','RedacteurFlux1',TRUE),				-- 1er Groupe Redacteur du premier flux
+('Avions et création','Lecteur2Flux1',FALSE),				-- 2ème Groupe Lecteur du premier flux
+('BDD SQL','LecteurFlux2',FALSE),						-- 1er Groupe Lecteur du second flux
+('BDD SQL','RedacteurFlux2',TRUE),							-- 1er Groupe Redacteur du second flux
+('Programmation objet','LecteurFlux3',FALSE),			-- 1er Groupe Lecteur du troisième flux
+('Programmation objet','RedacteurFlux3',TRUE)				-- 1er Groupe Redacteur du troisième flux
 ;
 
 INSERT INTO Compo_Groupe
 VALUES 
-('michel.durand@email.com',1),
-	('inconnu@email.com',1),
-	('inconnu2@email.com',1),
-	('inconnu3@email.com',1),
-('michel.durand@email.com',2),
-	('inconnu4@email.com',1),
-('micheld@email.com',3),
-	('inconnu4@email.com',3),
-('michel.durand@email.com',4),
-	('inconnu5@email.com',4),
-('michel.durand@email.com',5),
-('michel.durand@email.com',6),
-	('inconnu6@email.com',6),
-	('inconnu7@email.com',6),
-('michel.durand@email.com',7)
+('michel.durand@email.com','LecteurFlux1'),
+	('inconnu@email.com','LecteurFlux1'),
+	('inconnu2@email.com','LecteurFlux1'),
+	('inconnu3@email.com','LecteurFlux1'),
+('michel.durand@email.com','RedacteurFlux1'),
+	('inconnu4@email.com','LecteurFlux1'),
+('micheld@email.com','Lecteur2Flux1'),
+	('inconnu4@email.com','Lecteur2Flux1'),
+('michel.durand@email.com','LecteurFlux2'),
+	('inconnu5@email.com','LecteurFlux2'),
+('michel.durand@email.com','RedacteurFlux2'),
+('michel.durand@email.com','LecteurFlux3'),
+	('inconnu6@email.com','LecteurFlux3'),
+	('inconnu7@email.com','RedacteurFlux3'),
+('michel.durand@email.com','RedacteurFlux3')
 ;
 
 INSERT INTO Publication
@@ -158,9 +157,9 @@ VALUES
 
 INSERT INTO Lire
 VALUES
-('www.avions/article.com','michel.durand@email.com',1,'like'),
-('www.avions/article.com','inconnu@email.com',1,'like'),
-('www.avions/article.com','inconnu2@email.com',1,'like'),
-('www.avions/article.com','inconnu3@email.com',1,'dislike'),
-('www.cplusplus.com','michel.durand@email.com',7,'dislike')
+('www.avions/article.com','michel.durand@email.com','LecteurFlux1','like'),
+('www.avions/article.com','inconnu@email.com','LecteurFlux1','like'),
+('www.avions/article.com','inconnu2@email.com','LecteurFlux1','like'),
+('www.avions/article.com','inconnu3@email.com','LecteurFlux1','dislike'),
+('www.cplusplus.com','michel.durand@email.com','RedacteurFlux3','dislike')
 ;

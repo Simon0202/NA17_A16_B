@@ -1,3 +1,5 @@
+DROP TABLE Utilisateur, Flux, Groupe_Utilisateur, Droits_Groupes_Flux, Publication, Article, Multimedia, Lire, Compo_Groupe ;
+
 CREATE TABLE Utilisateur(
 email VARCHAR(50) PRIMARY KEY,
 nom VARCHAR(20) NOT NULL,
@@ -16,24 +18,26 @@ confidentialite VARCHAR(20) CHECK (confidentialite = 'public' OR confidentialite
 createur VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
 );
 
-CREATE TABLE Groupe_Lecteurs(
-id_lecteur INT PRIMARY KEY,
-email_admin VARCHAR(50) NOT NULL REFERENCES Utilisateur(email),
-titre VARCHAR(50) NOT NULL REFERENCES Flux(titre)
+CREATE TABLE Groupe_Utilisateur(
+nom VARCHAR(20),
+id_utilisateur INT PRIMARY KEY,
+email_admin VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
 );
 
-CREATE TABLE Groupe_Redacteurs(
-id_lecteur INT PRIMARY KEY REFERENCES Groupe_Lecteurs(id_lecteur),
-id_redacteur INT UNIQUE
+CREATE TABLE Droits_Groupes_Flux(
+flux VARCHAR(50) REFERENCES flux(titre),
+id_utilisateur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
+redacteur BOOLEAN,
+PRIMARY KEY (flux, id_utilisateur)
 );
 
 CREATE TABLE Publication(
 lien VARCHAR(50) PRIMARY KEY,
-id_lecteur INT NOT NULL REFERENCES Groupe_Lecteurs(id_lecteur),
-id_redacteur INT NOT NULL REFERENCES Groupe_Redacteurs(id_redacteur),
+flux VARCHAR(50) NOT NULL REFERENCES  Flux(titre),
 titre VARCHAR(50) NOT NULL,
 date_publi DATE NOT NULL,
-etat VARCHAR(20) CHECK (etat = 'valide' OR etat = 'rejete' OR etat = 'supprime')
+etat VARCHAR(20) CHECK (etat = 'valide' OR etat = 'rejete' OR etat = 'supprime'),
+last_edit VARCHAR(50) REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Article(
@@ -51,7 +55,7 @@ url VARCHAR(50)
 CREATE TABLE Lire(
 lien_publi VARCHAR(50) REFERENCES Publication(lien),
 email VARCHAR(50) REFERENCES Utilisateur(email),
-id_lecteur INT REFERENCES Groupe_Lecteurs(id_lecteur),
+id_lecteur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
 PRIMARY KEY (lien_publi, email),
 vote VARCHAR(10) CHECK (vote='like' OR vote='dislike' OR vote='null'),
 commentaire VARCHAR(450)
@@ -59,8 +63,8 @@ commentaire VARCHAR(450)
 
 CREATE TABLE Compo_Groupe(
 email VARCHAR(50) REFERENCES Utilisateur(email),
-id_lecteur INT REFERENCES Groupe_Lecteurs(id_lecteur),
-PRIMARY KEY(email, id_lecteur)
+id_utilisateur INT REFERENCES Groupe_Utilisateur(id_utilisateur),
+PRIMARY KEY(email, id_utilisateur)
 );
 
 INSERT INTO Utilisateur (email, nom, prenom, entreprise)
@@ -89,20 +93,24 @@ VALUES ('Avions et création','public','michel.durand@email.com'),
 ;
 
 
-INSERT INTO Groupe_Lecteurs
-VALUES (1,'michel.durand@email.com','Avions et création'),		-- 1er Groupe Lecteur du premier flux
-(2,'michel.durand@email.com','Avions et création'),			-- 1er Groupe Redacteur du premier flux
-(3,'micheld@email.com','Avions et création'),					-- 2ème Groupe Lecteur du premier flux
-(4,'michel.durand@email.com','BDD SQL'),			-- 1er Groupe Lecteur du second flux
-(5,'michel.durand@email.com','BDD SQL'),				-- 1er Groupe Redacteur du second flux
-(6,'michel.durand@email.com','Programmation objet'),			-- 1er Groupe Lecteur du troisième flux
-(7,'michel.durand@email.com','Programmation objet')				-- 1er Groupe Redacteur du troisième flux
+INSERT INTO Groupe_Utilisateur
+VALUES ('LecteurFlux1',1,'michel.durand@email.com'),		-- 1er Groupe Lecteur du premier flux
+('RedacteurFlux1',2,'michel.durand@email.com'),			-- 1er Groupe Redacteur du premier flux
+('Lecteur2Flux1',3,'micheld@email.com'),					-- 2ème Groupe Lecteur du premier flux
+('LecteurFlux2',4,'michel.durand@email.com'),			-- 1er Groupe Lecteur du second flux
+('RedacteurFlux2',5,'michel.durand@email.com'),				-- 1er Groupe Redacteur du second flux
+('LecteurFlux3',6,'michel.durand@email.com'),			-- 1er Groupe Lecteur du troisième flux
+('RedacteurFlux3',7,'michel.durand@email.com')				-- 1er Groupe Redacteur du troisième flux
 ;
 
-INSERT INTO Groupe_Redacteurs
-VALUES (2,1), 								-- On assigne Groupe_lecteur n°2 comme groupe_Redacteur
-(5,2),										-- On assigne Groupe_lecteur n°5 comme groupe_Redacteur
-(7,3)										-- On assigne Groupe_lecteur n°7 comme groupe_Redacteur
+INSERT INTO Droits_Groupes_Flux
+VALUES ('Avions et création',1,FALSE),		-- 1er Groupe Lecteur du premier flux
+('Avions et création',2,TRUE),				-- 1er Groupe Redacteur du premier flux
+('Avions et création',3,FALSE),				-- 2ème Groupe Lecteur du premier flux
+('BDD SQL',4,FALSE),						-- 1er Groupe Lecteur du second flux
+('BDD SQL',5,TRUE),							-- 1er Groupe Redacteur du second flux
+('Programmation objet',6,FALSE),			-- 1er Groupe Lecteur du troisième flux
+('Programmation objet',7,TRUE)				-- 1er Groupe Redacteur du troisième flux
 ;
 
 INSERT INTO Compo_Groupe
@@ -126,12 +134,12 @@ VALUES
 
 INSERT INTO Publication
 VALUES
-('www.avions/article.com',1,1,'Vieux avions','20160101','valide'),
-('www.avions/article2.com',2,1,'Nouveaux avions','20160101','valide'),
-('www.bddpourlavie/extrait.com',4,2,'Le SQL','20160101','valide'),
-('www.mauvaissite/extrait.com',5,2,'Langages pour BDD','20160101','rejete'),
-('www.cplusplus.com',6,3,'Le C++','20160101','valide'),
-('www.cplusplus/videos.com',7,3,'Le C++','20160101','valide')
+('www.avions/article.com','Avions et création','Vieux avions','20160101','valide','michel.durand@email.com'),
+('www.avions/article2.com','Avions et création','Nouveaux avions','20160101','valide','michel.durand@email.com'),
+('www.bddpourlavie/extrait.com','BDD SQL','Le SQL','20160101','valide','michel.durand@email.com'),
+('www.mauvaissite/extrait.com','BDD SQL','Langages pour BDD','20160101','rejete','michel.durand@email.com'),
+('www.cplusplus.com','Programmation objet','Le C++','20160101','valide','michel.durand@email.com'),
+('www.cplusplus/videos.com','Programmation objet','Le C++','20160101','valide','michel.durand@email.com')
 ;
 
 INSERT INTO Article

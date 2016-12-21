@@ -18,24 +18,26 @@
 	        <input type="text" size="20" id ="emailUtilisateurExistant" name="emailUtilisateurExistant">
 	        <input type="submit"/>
 	    </form>
-	    <p>Entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>
         <?php
 
             $emailUtilisateurExistant=$_POST['emailUtilisateurExistant'];
-            if ($emailUtilisateurExistant){
+            if (isset($emailUtilisateurExistant)){
                 require_once ('connect.php');
 
                 $result = pg_query($bddconn, "SELECT nom FROM utilisateur WHERE utilisateur.email='$emailUtilisateurExistant';");
                 $row = pg_fetch_row($result);
-                if (!$row) {
+                if (!isset($row)) {
                     echo "<br/>Utilisateur inexistant.\n";
+                    echo "<p>Veuillez entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>";
                 }
-                else{
-                    echo "$row[0]";
+                else{       
+                    echo "<br/>";            
+                    echo "<b>Chargement de l'utilisateur: $row[0]<b>";
                     echo "<br />\n";
+
                     $_SESSION["emailUtilisateurCourant"] = $emailUtilisateurExistant;
 
-                    header ("Location: homePage.php");
+                    echo "<meta http-equiv=Refresh content='0.5; url=homePage.php' />";
                 }
                 pg_close($bddconn);        
             }
@@ -75,7 +77,7 @@
                 //TODO : test de confimation d'ajout à la base
                 $testExist = pg_query($bddconn, "SELECT email FROM utilisateur WHERE utilisateur.email='$emailUtilisateur';");
                 $row = pg_fetch_row($testExist);
-                if (!$row) {
+                if (!isset($row)) {
                     echo "<br/>L'utilisateur n'a pas pu être ajouté ou existe déjà.\n";
                 }
                 else{

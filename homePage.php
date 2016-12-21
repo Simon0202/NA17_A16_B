@@ -7,7 +7,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Dashboard</title>
+    <title>Home Page</title>
     <style type="text/css" media="screen"></style>
   </head>
   <body>   
@@ -48,8 +48,10 @@
       else {
         echo"<tr>$fetch[0] $fetch[1] $fetch[2] $fetch[3] $fetch[4] $fetch[5] </tr>";
       } 
-      mysql_close();
+      pg_close(); 
     ?>
+	<br/>
+    <a href="index.php"><button>Deconnexion</button></a>
   </body>
 </html>
 

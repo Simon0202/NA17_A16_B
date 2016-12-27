@@ -52,7 +52,7 @@
         $result = pg_query($bddconn, $query);
 
       echo "<table>";
-      echo "<tr><th>Lien</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th>Provenance</th></tr>";
+      echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th>Provenance</th></tr>";
         while($row=pg_fetch_array($result)){
           echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
           echo "<td><form method='POST' action='dashboard.php'>";
@@ -82,8 +82,18 @@
 
           echo "<h3>Contenu de l'article</h3>";
           echo "<p>$row[0]</p>";
+          echo "<br/>";
+          echo "<button value='commenter'>Deposer un commentaire</button>";
           echo "<h3>URL relative a l'article</h3>";
           echo "<p>$row[1]</p>";
+
+           echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+          echo "<form method='POST' action='dashboard.php'>";
+        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
+        echo "</form>";
+
         }  
     ?>
 
@@ -97,13 +107,19 @@
 
           echo "<h3>Legende</h3>";
           echo "<p>$row[0]</p>";
+          echo "<br/>";
+          echo "<button value='commenter'>Deposer un commentaire</button>";
           echo "<h3>URL</h3>";
-          echo "<p>$row[1]</p>";
-        }  
+          echo "<p>$row[1]</p>";       
 
+ echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
         echo "<form method='POST' action='dashboard.php'>";
         echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
         echo "</form>";
+
+      }
 
     ?>
 
@@ -112,10 +128,86 @@
     <!--La section qui affiche l'ensemble des publications visibles l'utilisateur autre que les siennes-->  
     <div id="autrePublications">
       <h2>Publications Visibles</h2>
+      <?php
+        $query1= "SELECT p.lien, p.flux, p.date_publi, p.etat, p.last_edit from Flux f, publication p where f.confidentialite='public' and f.createur<>'$mailSession' and f.titre = p.flux and p.etat='valide';";
+
+        $result1 = pg_query($bddconn, $query1);
+
+        echo "<table>";
+        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th></tr>";
+        while($row1=pg_fetch_array($result1)){
+          echo "<tr align='center'><td>$row1[0]</td><td>$row1[1]</td><td>$row1[2]</td><td>$row1[3]</td><td>$row1[4]</td>";
+          echo "<td><form method='POST' action='dashboard.php'>";
+          echo "<button name='articlesToShow1' value='$row1[0]'>Articles</button>";
+          echo "</form></td>";  
+          echo "<td><form method='POST' action='dashboard.php'>";
+          echo "<button name='multimediaToShow1' value='$row1[0]'>Multimedia</button>";
+          echo "</form></td>";
+          echo "</tr>";
+        }
+      echo "</table>";
+
+     
+
+      ?>
+      </div>
 
 
-      <button value='like'>like</button> <button value='dislike'>dislike</button>
-      <button value='commenter'>Deposer un commentaire</button>
+    <!--La section qui affiche le contenu d'un article--> 
+    <?php
+      $linkOfArticles=$_POST['articlesToShow1'];
+      $linkOfMultimedia=$_POST['multimediaToShow1'];
+        
+
+        if ($linkOfArticles!='hide'&&isset($linkOfArticles)){
+          $query="SELECT a.texte, a.url_piece_jointe from article a where a.lien = '$linkOfArticles';";
+
+          $result = pg_query($bddconn,$query);
+          $row=pg_fetch_array($result);
+
+          echo "<h3>Contenu de l'article</h3>";
+          echo "<p>$row[0]</p>";
+          echo "<button value='like'>like</button> <button value='dislike'>dislike</button>";
+          echo "<button value='commenter'>Deposer un commentaire</button>";
+          echo "<br/>";
+          echo "<h3>URL relative a l'article</h3>";
+          echo "<p>$row[1]</p>";
+
+          echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<form method='POST' action='dashboard.php'>";
+        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
+        echo "</form>";
+        }  
+    ?>
+
+        <!--La section qui affiche le contenu multimedia--> 
+    <?php
+        if ($linkOfMultimedia!='hide'&&isset($linkOfMultimedia)){
+          $query="SELECT m.legende, m.url from multimedia m where m.lien = '$linkOfMultimedia';";
+
+          $result = pg_query($bddconn,$query);
+          $row=pg_fetch_array($result);
+
+          echo "<h3>Legende</h3>";
+          echo "<p>$row[0]</p>";      
+          echo "<button value='like'>like</button> <button value='dislike'>dislike</button>";
+          echo "<button value='commenter'>Deposer un commentaire</button>";
+          echo "<br/>";
+          echo "<h3>URL</h3>";
+          echo "<p>$row[1]</p>";
+
+          echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<form method='POST' action='dashboard.php'>";
+        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
+        echo "</form>";
+        }  
+
+        
+    ?>
     </div>
 
 

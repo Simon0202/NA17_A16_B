@@ -57,7 +57,10 @@
           echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
           echo "<td><form method='POST' action='dashboard.php'>";
           echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
-          echo "</form></td></tr>";  
+          echo "</form></td>";  
+          echo "<td><form method='POST' action='dashboard.php'>";
+          echo "<button name='multimediaToShow' value='$row[0]'>Multimedia</button>";
+          echo "</form></td></tr>";
         }
       echo "</table>";
 
@@ -68,17 +71,40 @@
     <!--La section qui affiche le contenu d'un article--> 
     <?php
       $linkOfArticles=$_POST['articlesToShow'];
+      $linkOfMultimedia=$_POST['multimediaToShow'];
         
 
-        if (isset($linkOfArticles)){
-          $query="SELECT a.texte from article a where a.lien = '$linkOfArticles';";
+        if ($linkOfArticles!='hide'&&isset($linkOfArticles)){
+          $query="SELECT a.texte, a.url_piece_jointe from article a where a.lien = '$linkOfArticles';";
 
           $result = pg_query($bddconn,$query);
           $row=pg_fetch_array($result);
 
-          echo "<h3 color='red'>Contenu de l'article</h3>";
+          echo "<h3>Contenu de l'article</h3>";
           echo "<p>$row[0]</p>";
-        }
+          echo "<h3>URL relative a l'article</h3>";
+          echo "<p>$row[1]</p>";
+        }  
+    ?>
+
+        <!--La section qui affiche le contenu multimedia--> 
+    <?php
+        if ($linkOfMultimedia!='hide'&&isset($linkOfMultimedia)){
+          $query="SELECT m.legende, m.url from multimedia m where m.lien = '$linkOfMultimedia';";
+
+          $result = pg_query($bddconn,$query);
+          $row=pg_fetch_array($result);
+
+          echo "<h3>Legende</h3>";
+          echo "<p>$row[0]</p>";
+          echo "<h3>URL</h3>";
+          echo "<p>$row[1]</p>";
+        }  
+
+        echo "<form method='POST' action='dashboard.php'>";
+        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
+        echo "</form>";
+
     ?>
 
 

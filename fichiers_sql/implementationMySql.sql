@@ -162,3 +162,6 @@ VALUES
 ('www.avions/article.com','inconnu3@email.com','LecteurFlux1','dislike'),
 ('www.cplusplus.com','michel.durand@email.com','RedacteurFlux3','dislike')
 ;
+
+
+--DELETE FROM lire where lien_publi='www.avions/article.com' and email='michel.durand@email.com';

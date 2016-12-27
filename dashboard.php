@@ -55,11 +55,12 @@
       $resultComm = pg_query($bddconn,$queryComm);
 
       if($resultComm){
-        echo "INSERTION DU COMMENTAIRE";
+        echo "INSERTION DU COMMENTAIRE REUSSI";
       }
       else{
-        echo "ECHEC DU COMMENTAIRE";
+        echo "ECHEC DE L INSERTION DU COMMENTAIRE";
       }
+      
     }
 
     ?>

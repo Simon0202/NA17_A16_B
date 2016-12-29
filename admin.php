@@ -43,6 +43,8 @@
         echo "</table>";
       ?>
       </div>
+
+      
       <!--La section qui permet de modifier le flux dépend de la tâche ouvrir/créer un flux-->          
       <?php
 

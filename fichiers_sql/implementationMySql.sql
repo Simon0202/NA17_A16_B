@@ -71,7 +71,6 @@ VALUES ('michel.durand@email.com','Durand','Michel','Big Company'),	-- Responsab
  ('micheld@email.com','Durent','Michel','Big Company'),
  ('paul@email.com','Gerdon','Paul','Small Company'),
  ('fançois@email.com','Klezt','François','Small Company'),
- 
  ('inconnu@email.com','n°1','inconnu','Small Company'),	-- éléments de tests pour les appartenances de groupe
  ('inconnu2@email.com','n°2','inconnu','Small Company'),
  ('inconnu3@email.com','n°3','inconnu','Small Company'),
@@ -163,3 +162,6 @@ VALUES
 ('www.avions/article.com','inconnu3@email.com','LecteurFlux1','dislike'),
 ('www.cplusplus.com','michel.durand@email.com','RedacteurFlux3','dislike')
 ;
+
+
+--DELETE FROM lire where lien_publi='www.avions/article.com' and email='michel.durand@email.com';

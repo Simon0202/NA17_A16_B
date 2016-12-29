@@ -135,6 +135,7 @@
         $confidentialiteFlux=$_POST['confidentialiteFlux'];
         $titreFluxASupprimer=$_POST['titreFluxASupprimer'];
         $nomGroupeAAjouterFlux=$_POST['nomGroupeAAjouterFlux'];
+        $nomGroupeASupprimerDuFlux=$_POST['nomGroupeASupprimerDuFlux'];
         $emailRespFlux=$_POST['emailResponsable'];
         $typeModif=$_POST['typeModif'];
         $ajouterGroupeType = $_POST['ajouterGroupeType'];
@@ -183,6 +184,10 @@
         }
         if(isset($ajouterGroupeType) && strcmp($ajouterGroupeType, 'redacteur')==0){
             pg_query($bddconn, "INSERT INTO droits_groupes_flux (flux, nom, redacteur) VALUES ('$titreFluxAModifier','$nomGroupeAAjouterFlux', TRUE);");
+        }
+
+        if(isset($nomGroupeASupprimerDuFlux)){
+            pg_query($bddconn, "DELETE FROM droits_groupes_flux WHERE nom='$nomGroupeASupprimerDuFlux' AND flux='$titreFluxAModifier';");
         }
 
         ?>
@@ -273,11 +278,11 @@
 
         if (isset($titreGroupeAModifier)){
             $_SESSION['groupeSelectionne'] = $titreGroupeAModifier;
-            if(strcmp($titreFluxAModifier, "nouveau") ==0){
+            if(strcmp($titreGroupeAModifier, "nouveau") ==0){
                 echo "<form id='groupeModification' method='POST' action='admin.php'>
                 <h3>Nouveau groupe</h3>
                 <label for='titre'>Titre : </label>
-                <input type='text' size='20' id ='titreGroupe' name='titreFlux'><br/>
+                <input type='text' size='20' id ='titreGroupe' name='titreGroupe'><br/>
                 <label for='emailResponsable'>Email responsable :</label>
                 <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
@@ -287,7 +292,7 @@
 
             }
             else {
-                $query="SELECT titre FROM Flux where createur='$mailSession' ORDER BY titre;";
+                $query="SELECT nom FROM groupe_utilisateur where createur='$mailSession' ORDER BY nom;";
 
                 $result = pg_query($bddconn, $query);
 
@@ -304,7 +309,9 @@
             }
 
             //Création du tableau regroupant les utilisateurs du groupe
-            $query="SELECT groupe_utilisateur.email_admin, droits_groupe.redacteur FROM droits_groupe, groupe_utilisateur WHERE droits_groupe_flux.flux='$titreFluxAModifier' AND droits_groupe.id_utilisateur= groupe_utilisateur ORDER BY titre;";
+
+            $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
+            $query="SELECT email FROM compo_groupe WHERE nom='$titreGroupeAModifier' ORDER BY email;";
 
             $result = pg_query($bddconn, $query);
             echo "<h3>Membres</h3>";
@@ -313,16 +320,16 @@
             while($row=pg_fetch_array($result)){
                 echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
                 echo "<form method='POST' action='admin.php'>";
-                echo "<button name='titreMembreASupprimer' value='$row[0]'>-</button>";
+                echo "<button name='emailMembreASupprimer' value='$row[0]'>-</button>";
                 echo "</form>";
                 echo "</td>";
                 echo "<tr>";
             }
             echo "</table>";
-            echo "<div id='listeGroupesFlux'>
+            echo "<div id='listeMembresGroupe'>
             <label for='emailMembre'>Ajouter membre :</label><br/>
-            <input type='text' size='20' id ='emailMembre' name='emailMembre' value='Mail utilisateur'>
-            <button name='ajouterLecteur'>Ajouter</button>
+            <input type='text' size='20' id ='emailMembre' name='emailMembreAAjouter' value='Mail utilisateur'>
+            <button name='ajouterMembre'>Ajouter</button>
             </div>";
 
         }
@@ -335,11 +342,14 @@
         $titreGroupe=$_POST['titreGroupe'];
         $titreGroupeASupprimer=$_POST['titreGroupeASupprimer'];
         $emailRespGroupe=$_POST['emailResponsable'];
-        $typeModif=$_POST['typeModif'];
         $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
+        $typeOp=$_POST['typeOp'];
+        $emailMembreAAjouter=$_POST['emailMembreAAjouter'];
+        $emailMembreASupprimer=$_POST['emailMembreASupprimer'];
+
 
         if(isset($titreGroupeASupprimer)){
-            $result = pg_query($bddconn, "DELETE FROM groupe_utilisateur WHERE titre='$titreGroupeASupprimer';");
+            $result = pg_query($bddconn, "DELETE FROM groupe_utilisateur WHERE nom='$titreGroupeASupprimer';");
             if (!isset($row)) {
                 echo "<br/>Le groupe n'a pu être supprimé.\n";
             }
@@ -349,22 +359,22 @@
 
         }
 
-        if(strcmp($typeModif, 'Enregistrer')==0){
-            pg_query($bddconn, "UPDATE flux SET createur='$emailRespFlux' WHERE titre='$titreFluxAModifier';");
-            pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFluxAModifier';");
+        if(strcmp($typeOp, 'MODIFICATION_GROUPE')==0){
+            pg_query($bddconn, "UPDATE groupe_utilisateur SET email_admin='$emailRespGroupe' WHERE nom='$titreGroupeAModifier';");
             echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
         };
 
-        if(isset($titreGroupe)){
-            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreGroupe';");
+        if(strcmp($typeOp, 'CREATION_GROUPE')==0){
+            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
             $testFetched = pg_fetch_row($testExist);
             if(strcmp($row[0], $titreGroupe)==0){
-                $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreGroupe' AND createur='$emailRespGroupe';"); 
+                echo "<br/>Un groupe du même titre existe déjà.\n";
             }
             else{
-                $result = pg_query($bddconn, "INSERT INTO flux (titre, confidentialite, createur) VALUES ('$titreGroupe','$confidentialiteFlux', '$emailRespGroupe');");       
+                $result = pg_query($bddconn, "INSERT INTO groupe_utilisateur (nom, email_admin) VALUES ('$titreGroupe','$emailRespGroupe');");  
+                //TODO ajouter utilisateur courant au groupe crée     
             }
-            $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreGroupe';");
+            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
             $row = pg_fetch_row($testExist);
             if (!isset($row[0])) {
                 echo "<br/>Le groupe n'a pas pu être ajouté.\n";
@@ -372,6 +382,14 @@
             else{
                 echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
             }
+        };
+
+        if(isset($emailMembreAAjouter)){
+            pg_query($bddconn, "INSERT INTO compo_groupe (email, nom) VALUES ('$emailMembreAAjouter','$titreGroupeAModifier');");
+        }
+
+        if(isset($emailMembreASupprimer)){
+            pg_query($bddconn, "DELETE FROM compo_groupe WHERE email='$emailMembreASupprimer' AND nom='$titreGroupeAModifier';");
         }
 
         ?>

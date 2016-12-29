@@ -95,14 +95,19 @@
             }
 
             //Création du tableau regroupant les groupes du flux
-            $query="SELECT nom FROM droits_groupes_flux WHERE nom='$titreFluxAModifier'  ORDER BY nom;";
+            $query="SELECT nom, redacteur FROM droits_groupes_flux WHERE flux='$titreFluxAModifier'  ORDER BY nom;";
 
             $result = pg_query($bddconn, $query);
             echo "<h3>Groupes associés</h3>";
             echo "<table>";
             echo "<tr><th>Nom groupe</th><th>Droits</th></tr>";
             while($row=pg_fetch_array($result)){
-                echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
+                if(strcmp($row[1], 'f')==0){
+                    echo "<tr><td>$row[0]</td><td>Lecteur</td><td>";
+                }
+                if(strcmp($row[1], 't')==0){
+                    echo "<tr><td>$row[0]</td><td>Redacteur</td><td>";
+                }
                 echo "<form method='POST' action='admin.php'>";
                 echo "<button name='nomGroupeASupprimerDuFlux' value='$row[0]'>-</button>";
                 echo "</form>";
@@ -236,7 +241,7 @@
       <!--On affiche ici la liste des groupes dont l'utilisateur est responsable-->     
       <?php
 
-        $query="SELECT titre FROM Flux where createur='$mailSession' ORDER BY titre;";  
+        $query="SELECT nom FROM groupe_utilisateur where email_admin='$mailSession' ORDER BY nom;";  
         $result = pg_query($bddconn, $query);
         
         echo "<table>";
@@ -275,6 +280,7 @@
                 <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <input name='typeModif' value='Créer' type='submit'/>
+                <input name='typeOp' value='CREATION_GROUPE' type='hidden'/>
                 ";
 
             }
@@ -291,6 +297,7 @@
                 <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <input name='typeModif' value='Enregistrer' type='submit'/>
+                <input name='typeOp' value='MODIFICATION_GROUPE' type='hidden'/>
                 "; 
             }
 
@@ -330,7 +337,7 @@
         $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
 
         if(isset($titreGroupeASupprimer)){
-            $result = pg_query($bddconn, "DELETE FROM flux WHERE titre='$titreGroupeASupprimer';");
+            $result = pg_query($bddconn, "DELETE FROM groupe_utilisateur WHERE titre='$titreGroupeASupprimer';");
             if (!isset($row)) {
                 echo "<br/>Le groupe n'a pu être supprimé.\n";
             }
@@ -340,10 +347,11 @@
 
         }
 
-        /*if(strcmp($typeModif, 'Enregistrer')==0){
-            $result = pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreGroupeAModifier' AND createur='$emailRespGroupe';");
+        if(strcmp($typeModif, 'Enregistrer')==0){
+            pg_query($bddconn, "UPDATE flux SET createur='$emailRespFlux' WHERE titre='$titreFluxAModifier';");
+            pg_query($bddconn, "UPDATE flux SET confidentialite='$confidentialiteFlux' WHERE titre='$titreFluxAModifier';");
             echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
-        };*/
+        };
 
         if(isset($titreGroupe)){
             $testExist = pg_query($bddconn, "SELECT titre FROM flux WHERE flux.titre='$titreGroupe';");

@@ -41,6 +41,7 @@
                 }
                 pg_close($bddconn);        
             }
+            pg_close($bddconn);
         ?>
     </div>
     <div id="inscriptionWidget">

@@ -37,8 +37,7 @@
     $personName = $_POST['nameGroup'];
     $commentaire1 = $_POST['commenter1'];
 
-/*
-    echo "<br/>";
+    /*echo "<br/>";
     echo "'$lien_publi1'";
     echo "<br/>";
     echo "'$personEmail'";
@@ -46,23 +45,22 @@
     echo "'$personName'";
     echo "<br/>";
     echo "'$commentaire1'";
-    echo "<br/>";
-*/
+    echo "<br/>";*/
 
-
+    require_once ('connect.php');
     if(isset($commentaire1,$personName,$personEmail,$lien_publi1)){
-      $queryComm = "INSERT INTO Lire(lienPubli, email, nom, commentaire) VALUES ('$lien_publi1','$personEmail','$personName','$commentaire1');";
+      $queryComm = "INSERT INTO Lire(lien_publi, email, nom, commentaire) VALUES ('$lien_publi1','$personEmail','$personName', '$commentaire1');";
       $resultComm = pg_query($bddconn,$queryComm);
-
-      if($resultComm){
+      $testComm = "SELECT commentaire FROM Lire WHERE lien_publi='$lien_publi1' AND email='$personEmail' AND nom='$personName' AND commentaire='$commentaire1'";
+      $resultComm = pg_query($bddconn,$testComm);
+      $row = pg_fetch_array($resultComm);
+      if(strcmp($row[0], $commentaire1)==0){
         echo "INSERTION DU COMMENTAIRE REUSSI";
       }
       else{
         echo "ECHEC DE L INSERTION DU COMMENTAIRE";
       }
-      
     }
-
     ?>
 
 

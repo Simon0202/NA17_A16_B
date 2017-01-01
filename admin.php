@@ -141,6 +141,8 @@
         $ajouterGroupeType = $_POST['ajouterGroupeType'];
         $titreFluxAModifier=$_SESSION['fluxSelectionne'];
 
+        require_once ('connect.php');
+
 
         if(isset($titreFluxASupprimer)){
             $result = pg_query($bddconn, "DELETE FROM flux WHERE titre='$titreFluxASupprimer';");
@@ -194,10 +196,11 @@
       </form>       
     </div>
 
-    <!--Module d'affichage et de création de flux-->
+    <!--Module d'affichage et de création des publications du flux selectionné-->
     <?php
 
     $titreFluxAModifier=$_SESSION['fluxSelectionne'];
+    require_once ('connect.php');
 
     if(isset($titreFluxAModifier)){
         echo "<div id='vosPublications' style='background-color:#eae8e4ff'>
@@ -212,7 +215,7 @@
         while($row=pg_fetch_array($result)){
           echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
           echo "<form method='POST' action='admin.php'>";
-          echo "<button name='titreFluxASupprimer' value='$row[0]'>Supprimer</button>";
+          echo "<button name='titrePublicationASupprimer' value='$row[0]'>-</button>";
           echo "</form>";
           echo "</td>";
           echo"<td><form method='POST' action='admin.php'>";
@@ -222,7 +225,7 @@
         }
         echo "</table>";
 
-
+        //Module de création de publication
         echo"</div>
           <form method='POST' action='admin.php'>
             <h3>Modifier / Créer publication</h3>
@@ -240,6 +243,12 @@
     }
     ?>
 
+    <!--On traite les données issues de la création de plublication-->
+    <?php
+
+
+    ?>
+
 
     <div id="vosGroupes">
       <h2>Parcourir vos groupes</h2>
@@ -247,6 +256,7 @@
          
       <!--On affiche ici la liste des groupes dont l'utilisateur est responsable-->     
       <?php
+        require_once ('connect.php');
 
         $query="SELECT nom FROM groupe_utilisateur where email_admin='$mailSession' ORDER BY nom;";  
         $result = pg_query($bddconn, $query);
@@ -275,6 +285,7 @@
 
         $titreGroupeAModifier=$_POST['titreGroupeAModifier'];
         $mailSession = $_SESSION["emailUtilisateurCourant"];
+        require_once ('connect.php');
 
         if (isset($titreGroupeAModifier)){
             $_SESSION['groupeSelectionne'] = $titreGroupeAModifier;
@@ -338,7 +349,6 @@
         <!--On traite ensuite les données envoyées pour créer/modifier le groupe -->
 
         <?php
-
         $titreGroupe=$_POST['titreGroupe'];
         $titreGroupeASupprimer=$_POST['titreGroupeASupprimer'];
         $emailRespGroupe=$_POST['emailResponsable'];
@@ -346,6 +356,8 @@
         $typeOp=$_POST['typeOp'];
         $emailMembreAAjouter=$_POST['emailMembreAAjouter'];
         $emailMembreASupprimer=$_POST['emailMembreASupprimer'];
+
+        require_once ('connect.php');
 
 
         if(isset($titreGroupeASupprimer)){

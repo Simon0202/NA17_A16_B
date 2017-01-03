@@ -207,7 +207,7 @@
         <h2>$titreFluxAModifier</h2>
         <div id='listeDesPublications'>";
 
-        $query="SELECT titre, lien, etat FROM Publication where createur='$titreFluxAModifier' ORDER BY titre;";
+        $query="SELECT titre, lien, etat FROM publication where flux='$titreFluxAModifier' ORDER BY titre;";
 
         $result = pg_query($bddconn, $query);
         echo "<table>";

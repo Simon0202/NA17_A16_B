@@ -70,31 +70,43 @@
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
-    	<h2>Mon Flux</h2>
+    	<h2>Mes Flux</h2>
     	<?php  
     		require_once('connect.php');
 
-    		$query="SELECT titre, confidentialite FROM Flux where createur='$mailSession' ORDER BY titre;";
+    		$query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$personEmail' GROUP BY titre ORDER BY titre;";
 
     		$result = pg_query($bddconn, $query);
     		
-			echo "<table>";
-			echo "<tr><th>Titre</th><th>Confidentialite</th></tr>";
+        echo "<table>";
+        echo "<tr><th>Titre</th><th>Confidentialite</th></tr>";
     		while($row=pg_fetch_array($result)){
-    			echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td></tr>";	
+    			echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td>";
+          echo "<td><form method='POST' action='dashboard.php'>";
+          echo "<button name='fluxSelectionneDashboard' value='$row[0]'>Ouvrir</button>";
+          echo "</form></td>";
+          echo "<tr>";	
     		}
-			echo "</table>";
+        echo "</table>";
     	?>
     </div>
 
 
     <!--La section qui affiche l'ensemble des publications relatives au flux de l'utilisateur-->  
     <div id="listePublications">
-      <h2>Mes Publications</h2>
       <?php
-        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit, f.titre FROM publication p, flux f WHERE p.flux=f.titre and f.createur = '$mailSession' ORDER BY p.date_publi, f.titre;";
 
-        $result = pg_query($bddconn, $query);
+      $fluxSelectionneDashboard=$_POST['fluxSelectionneDashboard'];
+      if (isset($fluxSelectionneDashboard)){
+            $_SESSION['fluxSelectionneDashboard'] = $fluxSelectionneDashboard;
+      }
+      $fluxSelectionneDashboard = $_SESSION['fluxSelectionneDashboard'];
+
+      echo "<h2>$fluxSelectionneDashboard</h2>";
+      
+      $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' ORDER BY p.date_publi, p.titre;";
+
+      $result = pg_query($bddconn, $query);
 
       echo "<table>";
       echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th>Provenance</th></tr>";
@@ -172,12 +184,12 @@
           echo "<h3>URL</h3>";
           echo "<p>$row[1]</p>";       
 
- echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<form method='POST' action='dashboard.php'>";
-        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
-        echo "</form>";
+          echo "<br/>";
+          echo "<br/>";
+          echo "<br/>";
+          echo "<form method='POST' action='dashboard.php'>";
+          echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
+          echo "</form>";
 
       }
 /*

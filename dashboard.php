@@ -70,7 +70,7 @@
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
-    	<h2>Mes Flux</h2>
+    	<h2>Mes Flux (note dev : ceux pour lesquels je suis lecteur)</h2>
     	<?php  
     		require_once('connect.php');
 

@@ -70,7 +70,8 @@
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
-    	<h2>Mes Flux (note dev : ceux pour lesquels je suis lecteur)</h2>
+    	<h2>Mes Flux</h2>
+      <p>(note dev : utilisateur est lecteur de ces flux)</p>
     	<?php  
     		require_once('connect.php');
 
@@ -102,24 +103,27 @@
       }
       $fluxSelectionneDashboard = $_SESSION['fluxSelectionneDashboard'];
 
-      echo "<h2>$fluxSelectionneDashboard</h2>";
-      
-      $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' ORDER BY p.date_publi, p.titre;";
+      if(isset($fluxSelectionneDashboard)){
+        echo "<h2>$fluxSelectionneDashboard</h2>";
+        
+        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' ORDER BY p.date_publi, p.titre;";
 
-      $result = pg_query($bddconn, $query);
+        $result = pg_query($bddconn, $query);
 
-      echo "<table>";
-      echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th>Provenance</th></tr>";
-        while($row=pg_fetch_array($result)){
-          echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
-          echo "<td><form method='POST' action='dashboard.php'>";
-          echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
-          echo "</form></td>";  
-          echo "<td><form method='POST' action='dashboard.php'>";
-          echo "<button name='multimediaToShow' value='$row[0]'>Multimedia</button>";
-          echo "</form></td></tr>";
-        }
-      echo "</table>";
+        echo "<table>";
+        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th></tr>";
+          while($row=pg_fetch_array($result)){
+            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
+            echo "<td><form method='POST' action='dashboard.php'>";
+            echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
+            echo "</form></td>";  
+            echo "<td><form method='POST' action='dashboard.php'>";
+            echo "<button name='multimediaToShow' value='$row[0]'>Multimedia</button>";
+            echo "</form></td></tr>";
+          }
+        echo "</table>";
+      }
+
 
       ?>
     </div>

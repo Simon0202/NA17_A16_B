@@ -1,4 +1,5 @@
 <?php
+    session_unset();
     session_start();
 ?>
 
@@ -34,9 +35,8 @@
                     echo "<br/>";            
                     echo "<b>Chargement de l'utilisateur: $row[0]<b>";
                     echo "<br />\n";
-
+                    session_unset();
                     $_SESSION["emailUtilisateurCourant"] = $emailUtilisateurExistant;
-
                     echo "<meta http-equiv=Refresh content='0.5; url=homePage.php' />";
                 }
                 pg_close($bddconn);        

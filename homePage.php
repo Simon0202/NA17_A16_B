@@ -42,38 +42,37 @@
         if($row[0] !== null){
             echo "<h2>Informations du groupe : </h2>";
             echo"<br/>";
-            echo "<div>Nom du groupe : $row[1] </div>";
-            echo "<div>E-mail de responsable du groupe : $mailSession</div>";
-            echo "<div>List de membre du group : </div>";
-            $a=$row[1];
-            $result = pg_query($bddconn, "SELECT u.nom, u.prenom FROM compo_groupe cg, utilisateur u WHERE u.email= cg.email and cg.nom='$a';");
+            $nom_g=$row[1];
+            $result = pg_query($bddconn, "SELECT u.nom, u.prenom FROM compo_groupe cg, utilisateur u WHERE u.email= cg.email and cg.nom='$nom_g';");
             $row = pg_fetch_row($result);
             if($row[0] == null){
                 echo "<div>Vous n'avez aucun membre dans ce groupe : </div>";
             }else{
-                echo "<div>                  $row[1], $row[0] </div>";
-                while($row = pg_fetch_row($result)){
-                    echo "<div>                  $row[1], $row[0] </div>";
+                echo "<table>";
+                echo "<tr><th>  Nom du groupe  </th><th>  E-mail de responsable  </th><th>  Nom de la membre du groupe  </th></tr>";
+                echo "<tr align='center'><td>$nom_g</td><td>$mailSession</td><td>$row[1],$row[0]</td></tr>";
+                while($row=pg_fetch_array($result)){
+                    echo "<tr align='center'><td>$row[1]</td><td>$mailSession</td><td>$row[1],$row[0]</td></tr>";
                 }
+                echo "</table>";
             }
         }else{
             $result = pg_query($bddconn, "SELECT nom FROM compo_groupe WHERE compo_groupe.email='$mailSession';");
             $row = pg_fetch_row($result);
+            echo "<h2>Informations du groupe : </h2>";
             if($row[0] == null){
-                echo "<h2>Vous n'appartenez aucun groupe : </h2>";
+                echo "<div>Vous n'appartenez aucun groupe : </div>";
             }else{
                 $nom_g=$row[0];
                 $result = pg_query($bddconn, "SELECT gu.email_admin, u.nom, u.prenom FROM compo_groupe cg, utilisateur u, groupe_utilisateur gu WHERE u.email= cg.email and cg.nom = gu.nom and cg.nom='$nom_g';");
                 $row = pg_fetch_row($result);
-                echo "<h2>Informations du groupe : </h2>";
-                echo"<br/>";
-                echo "<div>Nom du groupe : $nom_g </div>";
-                echo "<div>E-mail de responsable du groupe : $row[0]</div>";
-                echo "<div>List de membre du group : </div>";
-                echo "<div>$row[2], $row[1] </div>";
-                while($row = pg_fetch_row($result)){
-                    echo "<div>$row[2], $row[1] </div>";
+                echo "<table>";
+                echo "<tr><th>  Nom du groupe  </th><th>  E-mail de responsable  </th><th>  Nom de la membre du groupe  </th></tr>";
+                echo "<tr align='center'><td>$nom_g</td><td>$row[0]</td><td>$row[2], $row[1]</td></tr>";
+                while($row=pg_fetch_array($result)){
+                    echo "<tr align='center'><td>$nom_g</td><td>$row[0]</td><td>$row[2], $row[1]</td></tr>";
                 }
+                echo "</table>";
             }
         }
     ?>

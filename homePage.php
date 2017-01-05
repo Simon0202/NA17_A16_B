@@ -37,6 +37,31 @@
     <div id="groupeWidget">
     <?php
         require_once ('connect.php');
+        echo "<h2>Informations du groupe : </h2>";
+        $result=pg_query($bddconn, "select gu.nom, gu.email_admin, u.nom, u.prenom, cg.email from compo_groupe cg, groupe_utilisateur gu, utilisateur u where gu.nom = cg.nom and cg.email=u.email order by gu.nom, u.nom,u.prenom;");
+        echo "<table>";
+        echo "<tr><th>  Nom du groupe  </th><th>  E-mail de responsable  </th><th>  Prenom,Nom  </th><th> E-mail </th> </tr>";
+        while($row=pg_fetch_row($result)){
+            if($row[1] = $mailSession){
+                echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[3],$row[2]</td><td>$row[4]</td></tr>";
+            }
+        }
+        $result=pg_query($bddconn, "select gu.nom, gu.email_admin, u.nom, u.prenom, cg.email from compo_groupe cg, groupe_utilisateur gu, utilisateur u where gu.nom = cg.nom and cg.email=u.email order by gu.nom, u.nom,u.prenom;");
+        //echo "<tr align='center'><td>0</td><td>0</td><td>0</td><td>0</td></tr>";
+        while($row=pg_fetch_row($result)){
+            if($row[4] = $mailSession){
+                $nom_g=$row[0];
+                $result2=pg_query($bddconn, "select gu.nom, gu.email_admin, u.nom, u.prenom, cg.email from compo_groupe cg, groupe_utilisateur gu, utilisateur u where gu.nom = cg.nom and cg.email=u.email order by gu.nom, u.nom,u.prenom;");
+                while($row=pg_fetch_array($result2)){
+                    if($row[0]==$nom_g and $row[1] != $mailSession ){
+                        echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[3],$row[2]</td><td>$row[4]</td></tr>";
+                    }
+                }
+            }
+        }
+        echo "</table>";
+        
+        /*
         $result = pg_query($bddconn, "SELECT email_admin, nom FROM groupe_utilisateur WHERE groupe_utilisateur.email_admin='$mailSession';");
         $row = pg_fetch_row($result);
         if($row[0] !== null){
@@ -74,7 +99,7 @@
                 }
                 echo "</table>";
             }
-        }
+        }*/
     ?>
     </div>
     <a href="index.php"><button>Deconnexion</button></a>

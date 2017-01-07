@@ -107,14 +107,14 @@
       if(isset($fluxSelectionneDashboard)){
         echo "<h2>$fluxSelectionneDashboard</h2>";
         
-        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' ORDER BY p.date_publi, p.titre;";
+        $query="SELECT p.lien, p.titre, p.date_publi, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' AND p.etat<>'rejete' ORDER BY p.date_publi, p.titre;";
 
         $result = pg_query($bddconn, $query);
 
         echo "<table>";
-        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th></tr>";
+        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Derniere edition</th></tr>";
           while($row=pg_fetch_array($result)){
-            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
+            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td>";
             echo "<td><form method='POST' action='dashboard.php'>";
             echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
             echo "</form></td>";  

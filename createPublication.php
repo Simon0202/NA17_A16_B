@@ -139,7 +139,7 @@
       $fluxSelectionneCreationPublication = $_SESSION['fluxSelectionneCreationPublication'];
 
       if (isset($typeModif) && strcmp($typeModif, 'Créer')==0){
-        $queryComm = "INSERT INTO Publication(lien, flux, titre, date_publi, etat, last_edit) VALUES ('$lienPublication','$fluxSelectionneCreationPublication', '$titrePublication', current_date, 'rejete', '$mailSession');";
+        $queryComm = "INSERT INTO Publication(lien, flux, titre, date_publi, etat, last_edit) VALUES ('$lienPublication','$fluxSelectionneCreationPublication', '$titrePublication', current_date, 'valide', '$mailSession');";
         $resultComm = pg_query($bddconn,$queryComm);
         $testComm = "SELECT lien FROM Publication WHERE lien='$lienPublication'";
         $resultComm = pg_query($bddconn,$testComm);

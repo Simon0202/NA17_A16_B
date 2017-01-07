@@ -26,4 +26,5 @@ Projet de création d'un dashboard pour l'UV NA17 (Conception de base de donnée
 - Écrire des messages d'erreurs
 - Imposer au moins un groupe rédacteur pour un flux
 - Gérer la création d'article ou multimédia
+- Faire en sorte qu'un groupe createur pour un flux soit automatiquement lecteur pour ce flux
 

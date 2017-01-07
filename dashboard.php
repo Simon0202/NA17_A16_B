@@ -20,6 +20,7 @@
     <!--En tete de la page-->  
     <a href="homePage.php">Page d'accueil</a>
     <a href="admin.php">Administration</a>
+    <a href="createPublication.php">Créer une publication</a>
     <h1 id="leTitre">Dashboard</h1>
 
 

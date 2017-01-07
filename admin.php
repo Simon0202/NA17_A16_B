@@ -12,6 +12,7 @@
   <body>
     <a href="homePage.php">Page d'accueil</a>
     <a href="dashboard.php">Dashboard</a>
+    <a href="createPublication.php">Créer une publication</a>
     <h1 id="leTitre">Administration</h1>
     <div id="vosFluxDePublications" style="background-color:#eae8e4ff">
     	<h2>Vos flux de publications</h2>
@@ -50,16 +51,15 @@
 
         $titreFluxAModifier=$_POST['titreFluxAModifier'];
         
-
         if (isset($titreFluxAModifier)){
             $_SESSION['fluxSelectionne'] = $titreFluxAModifier;
             if(strcmp($titreFluxAModifier, "nouveau") ==0){
                 echo "<form id='fluxModification' method='POST' action='admin.php'>
                 <h3>Nouveau flux</h3>
                 <label for='titre'>Titre : </label>
-                <input type='text' size='20' id ='titreFlux' name='titreFlux'><br/>
+                <input type='text' size='40' id ='titreFlux' name='titreFlux'><br/>
                 <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <label for='confidentialiteFlux'>Confidentialité :</label>
                 <select name='confidentialiteFlux'>
@@ -79,7 +79,7 @@
                 echo "<form id='fluxModification' method='POST' action='admin.php'>
                 <h3>Modifier $titreFluxAModifier</h3>
                 <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <label for='confidentialiteFlux'>Confidentialité :</label>
                 <select name='confidentialiteFlux'>";
@@ -119,7 +119,7 @@
             echo "</table>";
             echo "<div id='listeGroupesFlux'>
             <label for='emailResponsable'>Ajouter groupe :</label><br/>
-            <input type='text' size='20' id ='emailResponsableGroupe' name='nomGroupeAAjouterFlux' value='Nom du groupe'>
+            <input type='text' size='40' id ='emailResponsableGroupe' name='nomGroupeAAjouterFlux' value='Nom du groupe'>
             <button name='ajouterGroupeType' value='lecteur'>Lecteur</button>
             <button name='ajouterGroupeType' value='redacteur'>Redacteur</button>
             </div>";
@@ -211,35 +211,20 @@
 
         $result = pg_query($bddconn, $query);
         echo "<table>";
-        echo "<tr><th>Titre</th><th>Lien</th><th>Etat</th></tr>";
+        echo "<tr><th>Titre</th><th>Lien</th><th>Etat</th><th>Score</th></tr>";
         while($row=pg_fetch_array($result)){
-          echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
-          echo "<form method='POST' action='admin.php'>";
+          echo "<tr><td>$row[0]</td><td>$row[1]</td><td></td><td></td>"; 
+          echo "<td><form method='POST' action='admin.php'>";
           echo "<button name='titrePublicationASupprimer' value='$row[0]'>-</button>";
           echo "</form>";
-          echo "</td>";
+          echo "</td></td>";
           echo"<td><form method='POST' action='admin.php'>";
-          echo "<button name='titreFluxAModifier' value='$row[0]'>Selectionner</button>";
+          echo "<button name='titreFluxAValider' value='$row[0]'>Valider/Dévalider</button>";
           echo "</form></td>";
           echo "<tr>";
         }
         echo "</table>";
-
-        //Module de création de publication
-        echo"</div>
-          <form method='POST' action='admin.php'>
-            <h3>Modifier / Créer publication</h3>
-            <label for='titre'>Titre : </label>
-            <input type='text' size='20' id ='titrePublication' name='titrePublication'><br/>
-            <label for='titre'>Lien : </label>
-            <input type='text' size='20' id ='lienPublication' name='lienPublication'>
-            <input type='submit'/>
-            <div id='scorePublication'>
-            Le score de la publication apparait ici.
-            </div>
-            <button>Valider/Dévalider</button>
-          </form>       
-        </div>";
+        echo "</div></div>";
     }
     ?>
 
@@ -293,9 +278,9 @@
                 echo "<form id='groupeModification' method='POST' action='admin.php'>
                 <h3>Nouveau groupe</h3>
                 <label for='titre'>Titre : </label>
-                <input type='text' size='20' id ='titreGroupe' name='titreGroupe'><br/>
+                <input type='text' size='40' id ='titreGroupe' name='titreGroupe'><br/>
                 <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <input name='typeModif' value='Créer' type='submit'/>
                 <input name='typeOp' value='CREATION_GROUPE' type='hidden'/>
@@ -312,7 +297,7 @@
                 echo "<form id='groupeModification' method='POST' action='admin.php'>
                 <h3>Modifier $titreGroupeAModifier</h3>
                 <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='20' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
                 <br/>
                 <input name='typeModif' value='Enregistrer' type='submit'/>
                 <input name='typeOp' value='MODIFICATION_GROUPE' type='hidden'/>
@@ -339,7 +324,7 @@
             echo "</table>";
             echo "<div id='listeMembresGroupe'>
             <label for='emailMembre'>Ajouter membre :</label><br/>
-            <input type='text' size='20' id ='emailMembre' name='emailMembreAAjouter' value='Mail utilisateur'>
+            <input type='text' size='40' id ='emailMembre' name='emailMembreAAjouter' value='Mail utilisateur'>
             <button name='ajouterMembre'>Ajouter</button>
             </div>";
 

@@ -13,6 +13,7 @@
   <body>   
     <a href="dashboard.php">Dashboard</a>
     <a href="admin.php">Administration</a>
+    <a href="createPublication.php">Créer une publication</a>
     <h1 id="leTitre">Page d'accueil</h1>
     <div>Bienvenue
         <?php

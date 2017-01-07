@@ -1,11 +1,11 @@
 DROP TABLE Utilisateur, Flux, Groupe_Utilisateur, Droits_Groupes_Flux, Publication, Article, Multimedia, Lire, Compo_Groupe ;
 
 CREATE TABLE Utilisateur(
-email VARCHAR(50) PRIMARY KEY,
+email VARCHAR(80) PRIMARY KEY,
 nom VARCHAR(20) NOT NULL,
 prenom VARCHAR(20) NOT NULL,
 date_naissance DATE,
-entreprise VARCHAR(50),
+entreprise VARCHAR(80),
 genre VARCHAR(20),
 pays VARCHAR(20),
 metier VARCHAR(20)
@@ -13,55 +13,43 @@ metier VARCHAR(20)
 
 
 CREATE TABLE Flux(
-titre VARCHAR(50) PRIMARY KEY,
+titre VARCHAR(80) PRIMARY KEY,
 confidentialite VARCHAR(20) CHECK (confidentialite = 'public' OR confidentialite = 'prive' OR confidentialite ='restreint'),
-createur VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
+createur VARCHAR(80) NOT NULL REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Groupe_Utilisateur(
 nom VARCHAR(20) PRIMARY KEY,
-email_admin VARCHAR(50) NOT NULL REFERENCES Utilisateur(email)
+email_admin VARCHAR(80) NOT NULL REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Droits_Groupes_Flux(
-flux VARCHAR(50) REFERENCES flux(titre),
+flux VARCHAR(80) REFERENCES flux(titre),
 nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
 redacteur BOOLEAN,
 PRIMARY KEY (flux, nom)
 );
 
 CREATE TABLE Publication(
-lien VARCHAR(50) PRIMARY KEY,
-flux VARCHAR(50) NOT NULL REFERENCES  Flux(titre),
-titre VARCHAR(50) NOT NULL,
+lien VARCHAR(80) PRIMARY KEY,
+flux VARCHAR(80) NOT NULL REFERENCES  Flux(titre),
+titre VARCHAR(80) NOT NULL,
 date_publi DATE NOT NULL,
 etat VARCHAR(20) CHECK (etat = 'valide' OR etat = 'rejete' OR etat = 'supprime'),
-last_edit VARCHAR(50) REFERENCES Utilisateur(email)
-);
-
-CREATE TABLE Article(
-lien VARCHAR(50) PRIMARY KEY REFERENCES Publication(lien),
-texte VARCHAR(450),
-url_piece_jointe VARCHAR(50)
-);
-
-CREATE TABLE Multimedia(
-lien VARCHAR(50) PRIMARY KEY REFERENCES Publication(lien),
-legende VARCHAR(50),
-url VARCHAR(50)
+last_edit VARCHAR(80) REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Lire(
-lien_publi VARCHAR(50) REFERENCES Publication(lien),
-email VARCHAR(50) REFERENCES Utilisateur(email),
+lien_publi VARCHAR(80) REFERENCES Publication(lien),
+email VARCHAR(80) REFERENCES Utilisateur(email),
 nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
 PRIMARY KEY (lien_publi, email),
 vote VARCHAR(10) CHECK (vote='like' OR vote='dislike' OR vote='null'),
-commentaire VARCHAR(450)
+commentaire VARCHAR(480)
 );
 
 CREATE TABLE Compo_Groupe(
-email VARCHAR(50) REFERENCES Utilisateur(email),
+email VARCHAR(80) REFERENCES Utilisateur(email),
 nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
 PRIMARY KEY(email, nom)
 );
@@ -81,13 +69,15 @@ VALUES ('michel.durand@email.com','Durand','Michel','Big Company'),	-- Responsab
  ('inconnu8@email.com','n°8','inconnu','Small Company'),
  ('inconnu9@email.com','n°9','inconnu','Small Company'),
  ('inconnu10@email.com','n°10','inconnu','Small Company'),
- ('inconnu11@email.com','n°11','inconnu','Small Company')
+ ('inconnu11@email.com','n°11','inconnu','Small Company'),
+ ('vilde@email.com','Lipktip','Vilde','Norvegian F')
  ;
 
 INSERT INTO Flux
 VALUES ('Avions et création','public','michel.durand@email.com'),
 ('BDD SQL','public','michel.durand@email.com'),
-('Programmation objet','public','paul@email.com')
+('Programmation objet','public','paul@email.com'),
+('Pêche à Tromso','public','vilde@email.com')
 ;
 
 
@@ -98,7 +88,8 @@ VALUES ('LecteurFlux1','michel.durand@email.com'),		-- 1er Groupe Lecteur du pre
 ('LecteurFlux2','michel.durand@email.com'),			-- 1er Groupe Lecteur du second flux
 ('RedacteurFlux2','michel.durand@email.com'),				-- 1er Groupe Redacteur du second flux
 ('LecteurFlux3','michel.durand@email.com'),			-- 1er Groupe Lecteur du troisième flux
-('RedacteurFlux3','michel.durand@email.com')				-- 1er Groupe Redacteur du troisième flux
+('RedacteurFlux3','michel.durand@email.com'),		-- 1er Groupe Redacteur du troisième flux
+('NorvegianFishers','vilde@email.com')				
 ;
 
 INSERT INTO Droits_Groupes_Flux
@@ -140,19 +131,6 @@ VALUES
 ('www.cplusplus/videos.com','Programmation objet','Le C++','20160101','valide','michel.durand@email.com')
 ;
 
-INSERT INTO Article
-VALUES
-('www.avions/article.com','Dans la vie, il y a deux avions : les vieux et les nouveaux',NULL),
-('www.avions/article2.com','Ici on parle des nouveaux avions',NULL),
-('www.bddpourlavie/extrait.com','Le SQL sert à manipuler des BDD',NULL),
-('www.mauvaissite/extrait.com','Cet article ne vaut rien',NULL),
-('www.cplusplus.com','Designs patterns',NULL)
-;
-
-INSERT INTO Multimedia
-VALUES
-('www.cplusplus/videos.com','Designs patterns',NULL)
-;
 
 INSERT INTO Lire
 VALUES

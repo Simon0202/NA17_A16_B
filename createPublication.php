@@ -31,49 +31,13 @@
 ************************************
 */
 ?>
-        <!--Insertion commentaire1 relatif a ses propres articles-->
-    <?php  
-    $lien_publi1 = $_POST['lienPubli'];
-    $personEmail = $mailSession;
-    $personName = $_POST['nameGroup'];
-    $commentaire1 = $_POST['commenter1'];
-
-    /*echo "<br/>";
-    echo "'$lien_publi1'";
-    echo "<br/>";
-    echo "'$personEmail'";
-    echo "<br/>";
-    echo "'$personName'";
-    echo "<br/>";
-    echo "'$commentaire1'";
-    echo "<br/>";*/
-
-    require_once ('connect.php');
-    if(isset($commentaire1,$personName,$personEmail,$lien_publi1)){
-      $queryComm = "INSERT INTO Lire(lien_publi, email, nom, commentaire) VALUES ('$lien_publi1','$personEmail','$personName', '$commentaire1');";
-      $resultComm = pg_query($bddconn,$queryComm);
-      $testComm = "SELECT commentaire FROM Lire WHERE lien_publi='$lien_publi1' AND email='$personEmail' AND nom='$personName' AND commentaire='$commentaire1'";
-      $resultComm = pg_query($bddconn,$testComm);
-      $row = pg_fetch_array($resultComm);
-      if(strcmp($row[0], $commentaire1)==0){
-        echo "INSERTION DU COMMENTAIRE REUSSI";
-      }
-      else{
-        echo "ECHEC DE L INSERTION DU COMMENTAIRE";
-      }
-    }
-    ?>
-
-
-
-
-
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
         <h2>Flux</h2>
         <?php  
             require_once('connect.php');
+            $personEmail = $mailSession;
 
             $query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$personEmail' AND dgf.redacteur=TRUE GROUP BY titre ORDER BY titre;";
 
@@ -84,7 +48,7 @@
             while($row=pg_fetch_array($result)){
                 echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td>";
           echo "<td><form method='POST' action='createPublication.php'>";
-          echo "<button name='fluxSelectionneDashboard' value='$row[0]'>Ouvrir</button>";
+          echo "<button name='fluxSelectionneCreationPublication' value='$row[0]'>Ouvrir</button>";
           echo "</form></td>";
           echo "<tr>";  
             }
@@ -97,30 +61,34 @@
     <div id="listePublications">
       <?php
 
-      $fluxSelectionneDashboard=$_POST['fluxSelectionneDashboard'];
-      if (isset($fluxSelectionneDashboard)){
-            $_SESSION['fluxSelectionneDashboard'] = $fluxSelectionneDashboard;
+      $fluxSelectionneCreationPublication=$_POST['fluxSelectionneCreationPublication'];
+      if (isset($fluxSelectionneCreationPublication)){
+            $_SESSION['fluxSelectionneCreationPublication'] = $fluxSelectionneCreationPublication;
       }
-      $fluxSelectionneDashboard = $_SESSION['fluxSelectionneDashboard'];
+      $fluxSelectionneCreationPublication = $_SESSION['fluxSelectionneCreationPublication'];
 
-      if(isset($fluxSelectionneDashboard)){
-        echo "<h2>$fluxSelectionneDashboard</h2>";
+      if(isset($fluxSelectionneCreationPublication)){
+        echo "<h2>$fluxSelectionneCreationPublication</h2>";
         
-        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' ORDER BY p.date_publi, p.titre;";
+        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneCreationPublication' ORDER BY p.date_publi, p.titre;";
 
         $result = pg_query($bddconn, $query);
 
         echo "<table>";
-        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th></tr>";
+        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th></th></tr>";
           while($row=pg_fetch_array($result)){
-            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td><td>$row[5]</td>";
+            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td>";
             echo "<td><form method='POST' action='createPublication.php'>";
-            echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
-            echo "</form></td>";  
+            echo "<button name='publicationToDelete' value='$row[0]'>-</button>";
+            echo "</form></td>";
             echo "<td><form method='POST' action='createPublication.php'>";
-            echo "<button name='multimediaToShow' value='$row[0]'>Multimedia</button>";
+            echo "<button name='publicationToModify' value='$row[0]'>Modifier</button>";
             echo "</form></td></tr>";
           }
+            echo "<tr><td></td><td></td><td></td><td></td><td></td><td><form method='POST' action='createPublication.php'>";
+            echo "<button name='creerPublication' value='new'>+</button>";
+            echo "</form></td></tr>";
+
         echo "</table>";
       }
 
@@ -129,81 +97,88 @@
     </div>
 
 
-    <!--La section qui affiche le contenu d'un article--> 
+    <!--La section qui permet de créer/modifier un article--> 
     <?php
-      $linkOfArticles=$_POST['articlesToShow'];
-      $linkOfMultimedia=$_POST['multimediaToShow'];       
+      $creerPublication=$_POST['creerPublication'];  
+      $publicationToModify=$_POST['publicationToModify'];
+      $fluxSelectionneCreationPublication = $_SESSION['fluxSelectionneCreationPublication']; 
 
-        if ($linkOfArticles!='hide'&&isset($linkOfArticles)){
-          $query="SELECT a.texte, a.url_piece_jointe from article a where a.lien ='$linkOfArticles';";
-          $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
-
-          $query2="SELECT g.nom from groupe_utilisateur g where g.email_admin='$mailSession';";
-          $result2= pg_query($bddconn,$query2);
-          $row2=pg_fetch_array($result2);
-
-          echo "<h3>Contenu de l'article </h3>";
-          echo "<p>$row[0]</p>";
-          echo "<br/>";
-
-
-
-          //Proposition de commentaire pour les articles
-          echo "<h4>Deposer un commentaire</h4>";
-          echo "<form method='POST' action='createPublication.php'>";
-          echo "<input type='text' size='60' name='commenter1'>";
-          echo "<input type='hidden' value='$linkOfArticles' name='lienPubli'>";
-          echo "<input type='hidden' value='$row2[0]' name='nameGroup'>";
-          echo "<input type='submit' value='commenter'>";
-          echo "</form>";
-
-
-
-
-          echo "<h3>URL relative a l'article</h3>";
-          echo "<p>$row[1]</p>";
-          echo "<br/>";
-          echo "<br/>";
-          echo "<br/>";
-          echo "<form method='POST' action='createPublication.php'>";
-          echo "<button name='articlesToShow' value='hide'>Cacher le contenu</button>";
-          echo "</form>";
-
-        }  
-    ?>
-
-        <!--La section qui affiche le contenu multimedia--> 
-    <?php
-        if ($linkOfMultimedia!='hide'&&isset($linkOfMultimedia)){
-          $query="SELECT m.legende, m.url from multimedia m where m.lien = '$linkOfMultimedia';";
-
-          $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
-
-          echo "<h3>Legende</h3>";
-          echo "<p>$row[0]</p>";
-          echo "<br/>";  
-
-          echo "<h3>URL</h3>";
-          echo "<p>$row[1]</p>";       
-
-          echo "<br/>";
-          echo "<br/>";
-          echo "<br/>";
-          echo "<form method='POST' action='createPublication.php'>";
-          echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
-          echo "</form>";
+      if (isset($creerPublication)) {
+        echo "<form id='publicationCreation' method='POST' action='createPublication.php'>
+        <h3>Nouvelle publication</h3>
+        <label for='titre'>Titre : </label>
+        <input type='text' size='20' id ='titrePublication' name='titrePublication'><br/>
+        <label for='lienPublication'>Lien :</label>
+        <input type='text' size='20' id ='lienPublication' name='lienPublication'>
+        <br/>
+        <input name='typeModif' value='Créer' type='submit'/>
+        ";
 
       }
-/*
-*********************************
-*****Fin de mes publications*****
-*********************************
-*/
+
+      if (isset($publicationToModify)) {
+        $query="SELECT p.lien, p.titre, p.date_publi, p.etat, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneCreationPublication' AND p.lien='$publicationToModify' ORDER BY p.date_publi, p.titre;";
+        $result = pg_query($bddconn,$query);
+        $row = pg_fetch_array($result);
+
+        echo "<form id='publicationCreation' method='POST' action='createPublication.php'>
+        <h3>$row[1]</h3>
+        <label for='titre'>Titre : </label>
+        <input type='text' size='20' id ='titrePublication' name='titrePublication' value='$row[1]'><br/>
+        <input name='typeModif' value='Modifier' type='submit'/>
+        <input type='hidden' value='$row[0]' name='lienPublication'>
+        </form>";
+
+      }
+
     ?>
+    <!--on traite les données traitées pour la création et la modification de publication-->
+    <?php
+      $titrePublication=$_POST['titrePublication']; 
+      $lienPublication=$_POST['lienPublication'];  
+      $typeModif=$_POST['typeModif'];
+      $publicationToDelete=$_POST['publicationToDelete'];
+      $fluxSelectionneCreationPublication = $_SESSION['fluxSelectionneCreationPublication'];
+
+      if (isset($typeModif) && strcmp($typeModif, 'Créer')==0){
+        $queryComm = "INSERT INTO Publication(lien, flux, titre, date_publi, etat, last_edit) VALUES ('$lienPublication','$fluxSelectionneCreationPublication', '$titrePublication', current_date, 'rejete', '$mailSession');";
+        $resultComm = pg_query($bddconn,$queryComm);
+        $testComm = "SELECT lien FROM Publication WHERE lien='$lienPublication'";
+        $resultComm = pg_query($bddconn,$testComm);
+        var_dump($resultComm);
+        $row = pg_fetch_array($resultComm);
+        if(strcmp($row[0], $lienPublication)==0){
+          echo "<meta http-equiv=Refresh content='0; url=createPublication.php' />";
+        }
+        else{
+          echo "ECHEC DE L INSERTION DE LA PUBLICATION";
+        }
+      }
+
+      if (isset($typeModif) && strcmp($typeModif, 'Modifier')==0){
 
 
+        $query = "UPDATE Publication SET titre='$titrePublication' WHERE lien='$lienPublication';";
+        $result = pg_query($bddconn,$query);
+        $test = "SELECT lien, titre FROM Publication WHERE lien='$lienPublication'";
+        $result = pg_query($bddconn,$test);
+        $row = pg_fetch_array($result);
+        if(strcmp($row[1], $titrePublication)==0){
+          echo "<meta http-equiv=Refresh content='0; url=createPublication.php' />";
+        }
+        else{
+          echo "ECHEC DE LA MODIFICATION DE LA PUBLICATION";
+        }
+      }
+
+      if (isset($publicationToDelete)){
+        $query = "DELETE FROM Publication WHERE lien='$publicationToDelete';";
+        $resultComm = pg_query($bddconn, $query);
+        echo "<meta http-equiv=Refresh content='0; url=createPublication.php' />";
+      }
+
+
+    ?>
   </body>
 </html>
 

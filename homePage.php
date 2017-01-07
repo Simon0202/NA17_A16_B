@@ -40,7 +40,7 @@
         <?php
             require_once('connect.php');
             echo "<h2>Informations du groupe</h2>";
-            $query="select gu.nom, gu.email_admin from compo_groupe cg, groupe_utilisateur gu where gu.nom = cg.nom and gu.email_admin='$mailSession' or cg.email ='$mailSession' group by gu.nom, gu.email_admin order by gu.email_admin, gu.nom";
+            $query="select gu.nom, gu.email_admin from compo_groupe cg, groupe_utilisateur gu where gu.nom = cg.nom and (gu.email_admin='$mailSession' or cg.email ='$mailSession') group by gu.nom, gu.email_admin order by gu.email_admin, gu.nom";
             $result = pg_query($bddconn, $query);
             
             echo "<table>";

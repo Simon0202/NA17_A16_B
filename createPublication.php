@@ -19,27 +19,19 @@
   <body>   
     <!--En tete de la page-->  
     <a href="homePage.php">Page d'accueil</a>
-    <a href="admin.php">Administration</a>
     <a href="dashboard.php">Dashboard</a>
+    <a href="createPublication.php">Créer une publication</a>
+    <a href="admin.php">Administration</a>
     <h1 id="leTitre">Créer une publication</h1>
-
-
-<?php
-/*
-************************************
-*****Insertion des commentaires*****
-************************************
-*/
-?>
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
-        <h2>Flux</h2>
+        <h2>Flux de création</h2>
         <?php  
             require_once('connect.php');
             $personEmail = $mailSession;
 
-            $query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$personEmail' AND dgf.redacteur=TRUE GROUP BY titre ORDER BY titre;";
+            $query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where (cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$personEmail' AND dgf.redacteur=TRUE AND f.confidentialite='public') OR f.createur='$personEmail' GROUP BY titre ORDER BY titre;";
 
             $result = pg_query($bddconn, $query);
             
@@ -78,9 +70,15 @@
         echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th><th></th></tr>";
           while($row=pg_fetch_array($result)){
             echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td>";
-            echo "<td><form method='POST' action='createPublication.php'>";
-            echo "<button name='publicationToDelete' value='$row[0]'>-</button>";
-            echo "</form></td>";
+            if (strcmp($row[4], $mailSession)==0){
+              echo "<td><form method='POST' action='createPublication.php'>";
+              echo "<button name='publicationToDelete' value='$row[0]'>-</button>";
+              echo "</form></td>";
+            }
+            else{
+              echo "<td></td>";
+            }
+
             echo "<td><form method='POST' action='createPublication.php'>";
             echo "<button name='publicationToModify' value='$row[0]'>Modifier</button>";
             echo "</form></td></tr>";
@@ -141,7 +139,7 @@
       $fluxSelectionneCreationPublication = $_SESSION['fluxSelectionneCreationPublication'];
 
       if (isset($typeModif) && strcmp($typeModif, 'Créer')==0){
-        $queryComm = "INSERT INTO Publication(lien, flux, titre, date_publi, etat, last_edit) VALUES ('$lienPublication','$fluxSelectionneCreationPublication', '$titrePublication', current_date, 'rejete', '$mailSession');";
+        $queryComm = "INSERT INTO Publication(lien, flux, titre, date_publi, etat, last_edit) VALUES ('$lienPublication','$fluxSelectionneCreationPublication', '$titrePublication', current_date, 'valide', '$mailSession');";
         $resultComm = pg_query($bddconn,$queryComm);
         $testComm = "SELECT lien FROM Publication WHERE lien='$lienPublication'";
         $resultComm = pg_query($bddconn,$testComm);

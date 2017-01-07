@@ -11,9 +11,10 @@
     <style type="text/css" media="screen"></style>
   </head>
   <body>   
+    <a href="homePage.php">Page d'accueil</a>
     <a href="dashboard.php">Dashboard</a>
-    <a href="admin.php">Administration</a>
     <a href="createPublication.php">Créer une publication</a>
+    <a href="admin.php">Administration</a>
     <h1 id="leTitre">Page d'accueil</h1>
     <div>Bienvenue
         <?php

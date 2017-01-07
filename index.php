@@ -27,7 +27,7 @@
 
                 $result = pg_query($bddconn, "SELECT nom FROM utilisateur WHERE utilisateur.email='$emailUtilisateurExistant';");
                 $row = pg_fetch_row($result);
-                if (!isset($row)) {
+                if (!isset($row[0])) {
                     echo "<br/>Utilisateur inexistant.\n";
                     echo "<p>Veuillez entrer l'adresse mail d'un utilisateur enregistré (ex: bob@email.com)</p>";
                 }

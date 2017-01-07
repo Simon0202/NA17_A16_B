@@ -13,7 +13,176 @@
     <a href="homePage.php">Page d'accueil</a>
     <a href="dashboard.php">Dashboard</a>
     <a href="createPublication.php">Créer une publication</a>
+    <a href="admin.php">Administration</a>
     <h1 id="leTitre">Administration</h1>
+
+ <div id="vosGroupes">
+      <h2>Parcourir vos groupes</h2>
+      <div id="listeDesGroupes">
+         
+      <!--On affiche ici la liste des groupes dont l'utilisateur est responsable-->     
+      <?php
+        require_once ('connect.php');
+
+        $query="SELECT nom FROM groupe_utilisateur where email_admin='$mailSession' ORDER BY nom;";  
+        $result = pg_query($bddconn, $query);
+        
+        echo "<table>";
+        echo "<tr><th>Titre</th></tr>";
+        while($row=pg_fetch_array($result)){
+            echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
+            echo "<form method='POST' action='admin.php'>";
+            echo "<button name='titreGroupeASupprimer' value='$row[0]'>-</button>";
+            echo "</form>";
+            echo "</td>";
+            echo"<td><form method='POST' action='admin.php'>";
+            echo "<button name='titreGroupeAModifier' value='$row[0]'>Ouvrir</button>";
+            echo "</form></td>";
+            echo "<tr>";
+        }
+        echo "<tr><td></td><td></td><td><form method='POST' action='admin.php'>";
+        echo "<button name='titreGroupeAModifier' value='nouveau'>+</button>";
+        echo "</form></td></tr>";
+        echo "</table>";
+      ?>
+      </div>
+      <!--La section qui permet de modifier le groupe dépend de la tâche ouvrir/créer un groupe-->          
+      <?php
+
+        $titreGroupeAModifier=$_POST['titreGroupeAModifier'];
+        $mailSession = $_SESSION["emailUtilisateurCourant"];
+        require_once ('connect.php');
+
+        if (isset($titreGroupeAModifier)){
+            $_SESSION['groupeSelectionne'] = $titreGroupeAModifier;
+            if(strcmp($titreGroupeAModifier, "nouveau") ==0){
+                echo "<form id='groupeModification' method='POST' action='admin.php'>
+                <h3>Nouveau groupe</h3>
+                <label for='titre'>Titre : </label>
+                <input type='text' size='40' id ='titreGroupe' name='titreGroupe'><br/>
+                <label for='emailResponsable'>Email responsable :</label>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <br/>
+                <input name='typeModif' value='Créer' type='submit'/>
+                <input name='typeOp' value='CREATION_GROUPE' type='hidden'/>
+                ";
+
+            }
+            else {
+                $query="SELECT nom FROM groupe_utilisateur where createur='$mailSession' ORDER BY nom;";
+
+                $result = pg_query($bddconn, $query);
+
+                $row=pg_fetch_array($result);
+                
+                echo "<form id='groupeModification' method='POST' action='admin.php'>
+                <h3>Modifier $titreGroupeAModifier</h3>
+                <label for='emailResponsable'>Email responsable :</label>
+                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
+                <br/>
+                <input name='typeModif' value='Enregistrer' type='submit'/>
+                <input name='typeOp' value='MODIFICATION_GROUPE' type='hidden'/>
+                "; 
+            }
+
+            //Création du tableau regroupant les utilisateurs du groupe
+
+            $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
+            $query="SELECT email FROM compo_groupe WHERE nom='$titreGroupeAModifier' ORDER BY email;";
+
+            $result = pg_query($bddconn, $query);
+            echo "<h3>Membres</h3>";
+            echo "<table>";
+            echo "<tr><th>Email</th></tr>";
+            while($row=pg_fetch_array($result)){
+                echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
+                echo "<form method='POST' action='admin.php'>";
+                echo "<button name='emailMembreASupprimer' value='$row[0]'>-</button>";
+                echo "</form>";
+                echo "</td>";
+                echo "<tr>";
+            }
+            echo "</table>";
+            echo "<div id='listeMembresGroupe'>
+            <label for='emailMembre'>Ajouter membre :</label><br/>
+            <input type='text' size='40' id ='emailMembre' name='emailMembreAAjouter' value='Mail utilisateur'>
+            <button name='ajouterMembre'>Ajouter</button>
+            </div>";
+
+        }
+        ?>
+
+        <!--On traite ensuite les données envoyées pour créer/modifier le groupe -->
+
+        <?php
+        $titreGroupe=$_POST['titreGroupe'];
+        $titreGroupeASupprimer=$_POST['titreGroupeASupprimer'];
+        $emailRespGroupe=$_POST['emailResponsable'];
+        $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
+        $typeOp=$_POST['typeOp'];
+        $emailMembreAAjouter=$_POST['emailMembreAAjouter'];
+        $emailMembreASupprimer=$_POST['emailMembreASupprimer'];
+
+        require_once ('connect.php');
+
+
+        if(isset($titreGroupeASupprimer)){
+            $result = pg_query($bddconn, "DELETE FROM groupe_utilisateur WHERE nom='$titreGroupeASupprimer';");
+            if (!isset($row)) {
+                echo "<br/>Le groupe n'a pu être supprimé.\n";
+            }
+            else{
+                echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+            }
+
+        }
+
+        if(strcmp($typeOp, 'MODIFICATION_GROUPE')==0){
+            pg_query($bddconn, "UPDATE groupe_utilisateur SET email_admin='$emailRespGroupe' WHERE nom='$titreGroupeAModifier';");
+            echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+        };
+
+        if(strcmp($typeOp, 'CREATION_GROUPE')==0){
+            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
+            $testFetched = pg_fetch_row($testExist);
+            if(strcmp($row[0], $titreGroupe)==0){
+                echo "<br/>Un groupe du même titre existe déjà.\n";
+            }
+            else{
+                pg_query($bddconn, "INSERT INTO groupe_utilisateur (nom, email_admin) VALUES ('$titreGroupe','$emailRespGroupe');");  
+                pg_query($bddconn, "INSERT INTO compo_groupe (email, nom) VALUES ('$emailRespGroupe','$titreGroupe');");     
+            }
+            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
+            $row = pg_fetch_row($testExist);
+            if (!isset($row[0])) {
+                echo "<br/>Le groupe n'a pas pu être ajouté.\n";
+            }
+            else{
+                echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+            }
+        };
+
+        if(isset($emailMembreAAjouter)){
+            pg_query($bddconn, "INSERT INTO compo_groupe (email, nom) VALUES ('$emailMembreAAjouter','$titreGroupeAModifier');");
+        }
+
+        if(isset($emailMembreASupprimer)){
+            pg_query($bddconn, "DELETE FROM compo_groupe WHERE email='$emailMembreASupprimer' AND nom='$titreGroupeAModifier';");
+        }
+
+        ?>
+      </form>       
+    </div>
+
+
+
+
+
+
+
+
+
+
     <div id="vosFluxDePublications" style="background-color:#eae8e4ff">
     	<h2>Vos flux de publications</h2>
       <div id="listeVosFluxDePublications">
@@ -196,7 +365,7 @@
       </form>       
     </div>
 
-    <!--Module d'affichage et de création des publications du flux selectionné-->
+    <!--Module d'affichage de la publication selectionnée-->
     <?php
 
     $titreFluxAModifier=$_SESSION['fluxSelectionne'];
@@ -213,13 +382,14 @@
         echo "<table>";
         echo "<tr><th>Titre</th><th>Lien</th><th>Etat</th><th>Score</th></tr>";
         while($row=pg_fetch_array($result)){
-          echo "<tr><td>$row[0]</td><td>$row[1]</td><td></td><td></td>"; 
+          echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td></td>"; 
           echo "<td><form method='POST' action='admin.php'>";
-          echo "<button name='titrePublicationASupprimer' value='$row[0]'>-</button>";
+          echo "<button name='lienPublicationASupprimer' value='$row[1]'>-</button>";
           echo "</form>";
           echo "</td></td>";
           echo"<td><form method='POST' action='admin.php'>";
-          echo "<button name='titreFluxAValider' value='$row[0]'>Valider/Dévalider</button>";
+          echo "<button name='lienPubliAValider' value='$row[1]'>Valider/Rejeter</button>";
+          echo "<input type='hidden' value='$row[2]' name='etatPubliAValider'>";
           echo "</form></td>";
           echo "<tr>";
         }
@@ -228,173 +398,36 @@
     }
     ?>
 
-    <!--On traite les données issues de la création de plublication-->
+    <!--Gestion de la suppression et de la validation des publications-->
     <?php
 
+    $lienPublicationASupprimer=$_POST['lienPublicationASupprimer'];
+    $lienPubliAValider=$_POST['lienPubliAValider'];
+    $etatPubliAValider=$_POST['etatPubliAValider'];
+    
+    require_once ('connect.php');
 
+    if (isset($lienPublicationASupprimer)){
+        $query = "DELETE FROM Publication WHERE lien='$lienPublicationASupprimer';";
+        $resultComm = pg_query($bddconn, $query);
+        echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+    }
+
+    if (isset($lienPubliAValider) && strcmp($etatPubliAValider, 'rejete')==0){
+        $query = "UPDATE Publication SET etat='valide' WHERE lien='$lienPubliAValider';";
+        $result = pg_query($bddconn,$query);
+        $resultComm = pg_query($bddconn, $query);
+        echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+    }
+
+    if (isset($lienPubliAValider) && strcmp($etatPubliAValider, 'valide')==0){
+        $query = "UPDATE Publication SET etat='rejete' WHERE lien='$lienPubliAValider';";
+        $result = pg_query($bddconn,$query);
+        $resultComm = pg_query($bddconn, $query);
+        echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
+    }
     ?>
 
-
-    <div id="vosGroupes">
-      <h2>Parcourir vos groupes</h2>
-      <div id="listeDesGroupes">
-         
-      <!--On affiche ici la liste des groupes dont l'utilisateur est responsable-->     
-      <?php
-        require_once ('connect.php');
-
-        $query="SELECT nom FROM groupe_utilisateur where email_admin='$mailSession' ORDER BY nom;";  
-        $result = pg_query($bddconn, $query);
-        
-        echo "<table>";
-        echo "<tr><th>Titre</th></tr>";
-        while($row=pg_fetch_array($result)){
-            echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
-            echo "<form method='POST' action='admin.php'>";
-            echo "<button name='titreGroupeASupprimer' value='$row[0]'>-</button>";
-            echo "</form>";
-            echo "</td>";
-            echo"<td><form method='POST' action='admin.php'>";
-            echo "<button name='titreGroupeAModifier' value='$row[0]'>Ouvrir</button>";
-            echo "</form></td>";
-            echo "<tr>";
-        }
-        echo "<tr><td></td><td></td><td><form method='POST' action='admin.php'>";
-        echo "<button name='titreGroupeAModifier' value='nouveau'>+</button>";
-        echo "</form></td></tr>";
-        echo "</table>";
-      ?>
-      </div>
-      <!--La section qui permet de modifier le groupe dépend de la tâche ouvrir/créer un groupe-->          
-      <?php
-
-        $titreGroupeAModifier=$_POST['titreGroupeAModifier'];
-        $mailSession = $_SESSION["emailUtilisateurCourant"];
-        require_once ('connect.php');
-
-        if (isset($titreGroupeAModifier)){
-            $_SESSION['groupeSelectionne'] = $titreGroupeAModifier;
-            if(strcmp($titreGroupeAModifier, "nouveau") ==0){
-                echo "<form id='groupeModification' method='POST' action='admin.php'>
-                <h3>Nouveau groupe</h3>
-                <label for='titre'>Titre : </label>
-                <input type='text' size='40' id ='titreGroupe' name='titreGroupe'><br/>
-                <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
-                <br/>
-                <input name='typeModif' value='Créer' type='submit'/>
-                <input name='typeOp' value='CREATION_GROUPE' type='hidden'/>
-                ";
-
-            }
-            else {
-                $query="SELECT nom FROM groupe_utilisateur where createur='$mailSession' ORDER BY nom;";
-
-                $result = pg_query($bddconn, $query);
-
-                $row=pg_fetch_array($result);
-                
-                echo "<form id='groupeModification' method='POST' action='admin.php'>
-                <h3>Modifier $titreGroupeAModifier</h3>
-                <label for='emailResponsable'>Email responsable :</label>
-                <input type='text' size='40' id ='emailResponsable' name='emailResponsable' value=$mailSession>
-                <br/>
-                <input name='typeModif' value='Enregistrer' type='submit'/>
-                <input name='typeOp' value='MODIFICATION_GROUPE' type='hidden'/>
-                "; 
-            }
-
-            //Création du tableau regroupant les utilisateurs du groupe
-
-            $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
-            $query="SELECT email FROM compo_groupe WHERE nom='$titreGroupeAModifier' ORDER BY email;";
-
-            $result = pg_query($bddconn, $query);
-            echo "<h3>Membres</h3>";
-            echo "<table>";
-            echo "<tr><th>Email</th></tr>";
-            while($row=pg_fetch_array($result)){
-                echo "<tr><td>$row[0]</td><td>$row[1]</td><td>"; 
-                echo "<form method='POST' action='admin.php'>";
-                echo "<button name='emailMembreASupprimer' value='$row[0]'>-</button>";
-                echo "</form>";
-                echo "</td>";
-                echo "<tr>";
-            }
-            echo "</table>";
-            echo "<div id='listeMembresGroupe'>
-            <label for='emailMembre'>Ajouter membre :</label><br/>
-            <input type='text' size='40' id ='emailMembre' name='emailMembreAAjouter' value='Mail utilisateur'>
-            <button name='ajouterMembre'>Ajouter</button>
-            </div>";
-
-        }
-        ?>
-
-        <!--On traite ensuite les données envoyées pour créer/modifier le groupe -->
-
-        <?php
-        $titreGroupe=$_POST['titreGroupe'];
-        $titreGroupeASupprimer=$_POST['titreGroupeASupprimer'];
-        $emailRespGroupe=$_POST['emailResponsable'];
-        $titreGroupeAModifier=$_SESSION['groupeSelectionne'];
-        $typeOp=$_POST['typeOp'];
-        $emailMembreAAjouter=$_POST['emailMembreAAjouter'];
-        $emailMembreASupprimer=$_POST['emailMembreASupprimer'];
-
-        require_once ('connect.php');
-
-
-        if(isset($titreGroupeASupprimer)){
-            $result = pg_query($bddconn, "DELETE FROM groupe_utilisateur WHERE nom='$titreGroupeASupprimer';");
-            if (!isset($row)) {
-                echo "<br/>Le groupe n'a pu être supprimé.\n";
-            }
-            else{
-                echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
-            }
-
-        }
-
-        if(strcmp($typeOp, 'MODIFICATION_GROUPE')==0){
-            pg_query($bddconn, "UPDATE groupe_utilisateur SET email_admin='$emailRespGroupe' WHERE nom='$titreGroupeAModifier';");
-            echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
-        };
-
-        if(strcmp($typeOp, 'CREATION_GROUPE')==0){
-            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
-            $testFetched = pg_fetch_row($testExist);
-            if(strcmp($row[0], $titreGroupe)==0){
-                echo "<br/>Un groupe du même titre existe déjà.\n";
-            }
-            else{
-                $result = pg_query($bddconn, "INSERT INTO groupe_utilisateur (nom, email_admin) VALUES ('$titreGroupe','$emailRespGroupe');");  
-                //TODO ajouter utilisateur courant au groupe crée     
-            }
-            $testExist = pg_query($bddconn, "SELECT nom FROM groupe_utilisateur WHERE groupe_utilisateur.nom='$titreGroupe';");
-            $row = pg_fetch_row($testExist);
-            if (!isset($row[0])) {
-                echo "<br/>Le groupe n'a pas pu être ajouté.\n";
-            }
-            else{
-                echo "<meta http-equiv=Refresh content='0; url=admin.php' />";
-            }
-        };
-
-        if(isset($emailMembreAAjouter)){
-            pg_query($bddconn, "INSERT INTO compo_groupe (email, nom) VALUES ('$emailMembreAAjouter','$titreGroupeAModifier');");
-        }
-
-        if(isset($emailMembreASupprimer)){
-            pg_query($bddconn, "DELETE FROM compo_groupe WHERE email='$emailMembreASupprimer' AND nom='$titreGroupeAModifier';");
-        }
-
-        ?>
-      </form>       
-    </div>
-
-
-    </div>
   </body>
 </html>
 

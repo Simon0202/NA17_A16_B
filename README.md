@@ -19,12 +19,14 @@ Projet de création d'un dashboard pour l'UV NA17 (Conception de base de donnée
 
 
 ## Known bugs
+- N'importe quel utilisateur peut se connecter
 
 
 ## TODO
 - Écrire plusieurs commentaires
 - Écrire des messages d'erreurs
-- Imposer au moins un groupe rédacteur pour un flux
-- Gérer la création d'article ou multimédia
-- Faire en sorte qu'un groupe createur pour un flux soit automatiquement lecteur pour ce flux
+- Gérer la création de contenu pour un article
+- Impossibilité de supprimer un groupe si un membre est dedans
+- Afficher dans le dashboard uniquement les publications validées.
+
 

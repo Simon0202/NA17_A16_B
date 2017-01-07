@@ -19,8 +19,9 @@
   <body>   
     <!--En tete de la page-->  
     <a href="homePage.php">Page d'accueil</a>
-    <a href="admin.php">Administration</a>
+    <a href="dashboard.php">Dashboard</a>
     <a href="createPublication.php">Créer une publication</a>
+    <a href="admin.php">Administration</a>
     <h1 id="leTitre">Dashboard</h1>
 
 
@@ -71,8 +72,7 @@
 
     <!--La section qui affiche l'ensemble du flux de l'utilisateur-->  
     <div id="fluxDePublications">
-    	<h2>Mes Flux</h2>
-      <p>(note dev : utilisateur est lecteur de ces flux)</p>
+    	<h2>Flux accessibles</h2>
     	<?php  
     		require_once('connect.php');
 

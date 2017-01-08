@@ -32,13 +32,18 @@
 ************************************
 */
 ?>
-        <!--Insertion commentaire1 relatif a ses propres articles-->
-    <?php  
-    $lien_publi1 = $_POST['lienPubli'];
-    $personEmail = $mailSession;
-    $personName = $_POST['nameGroup'];
+    <!--Insertion commentaire1 -->
+<?php  
+  //Variables pour commenter
+    $lien_publi1 = $_POST['lienOnReview'];
+    $dateOfReview = $_POST['dateOfReview'];
+    $emailReviewer = $_POST['emailReviewer'];
     $commentaire1 = $_POST['commenter1'];
 
+    //Variable pour faire un vote
+      $vote = $_POST['vote'];
+      $emailVoter = $_POST['emailVoter'];
+      $lienVoter = $_POST['lienVoter'];
     /*echo "<br/>";
     echo "'$lien_publi1'";
     echo "<br/>";
@@ -50,20 +55,33 @@
     echo "<br/>";*/
 
     require_once ('connect.php');
-    if(isset($commentaire1,$personName,$personEmail,$lien_publi1)){
-      $queryComm = "INSERT INTO Lire(lien_publi, email, nom, commentaire) VALUES ('$lien_publi1','$personEmail','$personName', '$commentaire1');";
-      $resultComm = pg_query($bddconn,$queryComm);
-      $testComm = "SELECT commentaire FROM Lire WHERE lien_publi='$lien_publi1' AND email='$personEmail' AND nom='$personName' AND commentaire='$commentaire1'";
-      $resultComm = pg_query($bddconn,$testComm);
-      $row = pg_fetch_array($resultComm);
-      if(strcmp($row[0], $commentaire1)==0){
-        echo "INSERTION DU COMMENTAIRE REUSSI";
-      }
-      else{
-        echo "ECHEC DE L INSERTION DU COMMENTAIRE";
-      }
+    if(isset($commentaire1,$dateOfReview,$emailReviewer,$lien_publi1)){
+      $queryComm = "INSERT INTO commentaire(lien_publi, email, datecomm, comm) VALUES ('$lien_publi1','$emailReviewer','$dateOfReview', '$commentaire1');";
+      $resultComm = pg_query($bddconn,$queryComm) or die('Échec de la requête : ' . pg_last_error());
+
+    echo "<br/>";
+    echo "<br/>";
+    echo "<i>Ajout reussi</i>";
     }
-    ?>
+
+    if(isset($lienVoter,$emailVoter,$vote)) {
+
+      echo "$lienVoter";
+      echo "<br>";
+      echo "$emailVoter";
+      echo "<br>";
+      echo "$vote";
+      echo "<br>";
+
+
+        $queryComm = "INSERT INTO lire VALUES ('$lien','$email','$vote');";
+      $resultComm = pg_query($bddconn,$queryComm) or die('Échec de la requête : ' . pg_last_error());
+
+    echo "<br/>";
+    echo "<br/>";
+    echo "<i>Vote reussi</i>";
+    }
+?>
 
 
 
@@ -76,7 +94,7 @@
     	<?php  
     		require_once('connect.php');
 
-    		$query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$personEmail' GROUP BY titre ORDER BY titre;";
+    		$query="SELECT f.titre, f.confidentialite FROM Flux f, droits_groupes_flux dgf, compo_groupe cg where cg.nom=dgf.nom AND dgf.flux=f.titre AND cg.email='$mailSession' GROUP BY titre ORDER BY titre;";
 
     		$result = pg_query($bddconn, $query);
     		
@@ -92,6 +110,7 @@
         echo "</table>";
     	?>
     </div>
+    <!--Fin de l'affichage des Flux accessibles-->
 
 
     <!--La section qui affiche l'ensemble des publications relatives au flux de l'utilisateur-->  
@@ -105,6 +124,7 @@
       $fluxSelectionneDashboard = $_SESSION['fluxSelectionneDashboard'];
 
       if(isset($fluxSelectionneDashboard)){
+
         echo "<h2>$fluxSelectionneDashboard</h2>";
         
         $query="SELECT p.lien, p.titre, p.date_publi, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' AND p.etat<>'rejete' ORDER BY p.date_publi, p.titre;";
@@ -114,188 +134,90 @@
         echo "<table>";
         echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Derniere edition</th></tr>";
           while($row=pg_fetch_array($result)){
-            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td><td>$row[4]</td>";
+            echo "<tr align='center'> <td><a href='$row[0]' target='_blank'>$row[0]</a></td> <td>$row[1]</td> <td>$row[2]</td> <td>$row[3]</td> <td>$row[4]</td>";
             echo "<td><form method='POST' action='dashboard.php'>";
-            echo "<button name='articlesToShow' value='$row[0]'>Articles</button>";
-            echo "</form></td>";  
-            echo "<td><form method='POST' action='dashboard.php'>";
-            echo "<button name='multimediaToShow' value='$row[0]'>Multimedia</button>";
+            echo "<button name='reviews' value='$row[0]'>Reviews</button>"; 
             echo "</form></td></tr>";
           }
         echo "</table>";
       }
 
-
       ?>
     </div>
+    <!--Fin des publications d'un Flux accessibles-->
 
-
-    <!--La section qui affiche le contenu d'un article--> 
+    <!--La section qui affiche les commentaires et les likes/dislikes--> 
     <?php
-      $linkOfArticles=$_POST['articlesToShow'];
-      $linkOfMultimedia=$_POST['multimediaToShow'];       
+      $reviews=$_POST['reviews'];      
 
-        if ($linkOfArticles!='hide'&&isset($linkOfArticles)){
-          $query="SELECT a.texte, a.url_piece_jointe from article a where a.lien ='$linkOfArticles';";
+        if ($reviews!='hide'&&isset($reviews)){
+
+
+          echo "<h3>Score</h3>";
+
+          $query = "SELECT ps.sum from publi_score ps where ps.lien = '$reviews';";
           $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
+          while($row=pg_fetch_array($result)){
+            echo "<p>Le score de la publication est : <b>$row[0]</b></p>";
+          }
 
-          $query2="SELECT g.nom from groupe_utilisateur g where g.email_admin='$mailSession';";
-          $result2= pg_query($bddconn,$query2);
-          $row2=pg_fetch_array($result2);
+          echo "<table>";
+          echo "<tr> <form method='POST' action='dashboard.php'> ";
+          echo "<td> <button name='vote' value='1'>like</button>  </td>";
+          echo "<td> <button name='vote' value='-1'>dislike</button> </td>";
+          echo "<input type='hidden' value='$reviews' name='lienVoter'>";
+          echo "<input type='hidden' value='$mailSession' name='emailVoter'>";
+          echo "</form> </tr>";
+          echo "</table>";
 
-          echo "<h3>Contenu de l'article </h3>";
-          echo "<p>$row[0]</p>";
-          echo "<br/>";
 
 
 
+
+
+
+          echo "<h3>Commentaires liés</h3>";
+
+          $query="SELECT c.email, c.datecomm, c.comm from commentaire c where c.lien_publi ='$reviews';";
+          $result = pg_query($bddconn,$query);
+
+          echo "<table>";
+          echo "<tr><th>Email</th><th>Date de publication</th><th>Commentaires</th></tr>";
+          while($row=pg_fetch_array($result)){
+            echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td>";
+            echo "<td><form method='POST' action='dashboard.php'>";
+            echo "<button name='modifier' value='$row[1]'>Modifier</button>"; 
+            echo "</form></td></tr>";
+          }
+          echo "</table>";
+
+   
           //Proposition de commentaire pour les articles
-          echo "<h4>Deposer un commentaire</h4>";
+          echo "<br/>";
+          echo "<br/>";
+          echo "<br/>";
+          echo "<h3>Deposer un commentaire</h3>";
+          $today = date('Y-m-d G:i:s');
           echo "<form method='POST' action='dashboard.php'>";
           echo "<input type='text' size='60' name='commenter1'>";
-          echo "<input type='hidden' value='$linkOfArticles' name='lienPubli'>";
-          echo "<input type='hidden' value='$row2[0]' name='nameGroup'>";
+          echo "<input type='hidden' value='$reviews' name='lienOnReview'>";
+          echo "<input type='hidden' value='$mailSession' name='emailReviewer'>";
+          echo "<input type='hidden' value='$today' name='dateOfReview'>";
           echo "<input type='submit' value='commenter'>";
           echo "</form>";
 
 
 
-
-          echo "<h3>URL relative a l'article</h3>";
-          echo "<p>$row[1]</p>";
+          //Boutton pour cacher les commentaires
           echo "<br/>";
           echo "<br/>";
           echo "<br/>";
           echo "<form method='POST' action='dashboard.php'>";
-          echo "<button name='articlesToShow' value='hide'>Cacher le contenu</button>";
+          echo "<button name='reviews' value='hide'>Cacher le contenu</button>";
           echo "</form>";
-
-        }  
-    ?>
-
-        <!--La section qui affiche le contenu multimedia--> 
-    <?php
-        if ($linkOfMultimedia!='hide'&&isset($linkOfMultimedia)){
-          $query="SELECT m.legende, m.url from multimedia m where m.lien = '$linkOfMultimedia';";
-
-          $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
-
-          echo "<h3>Legende</h3>";
-          echo "<p>$row[0]</p>";
-          echo "<br/>";  
-
-          echo "<h3>URL</h3>";
-          echo "<p>$row[1]</p>";       
-
-          echo "<br/>";
-          echo "<br/>";
-          echo "<br/>";
-          echo "<form method='POST' action='dashboard.php'>";
-          echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
-          echo "</form>";
-
-      }
-/*
-*********************************
-*****Fin de mes publications*****
-*********************************
-*/
-    ?>
-
-
-
-    <!--La section qui affiche l'ensemble des publications visibles l'utilisateur autre que les siennes-->  
-    <div id="autrePublications">
-      <h2>Publications Visibles</h2>
-      <?php
-        $query1= "SELECT p.lien, p.flux, p.date_publi, p.etat, p.last_edit from Flux f, publication p where f.confidentialite='public' and f.createur<>'$mailSession' and f.titre = p.flux and p.etat='valide';";
-
-        $result1 = pg_query($bddconn, $query1);
-
-        echo "<table>";
-        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Etat</th><th>Derniere edition</th></tr>";
-        while($row1=pg_fetch_array($result1)){
-          echo "<tr align='center'><td>$row1[0]</td><td>$row1[1]</td><td>$row1[2]</td><td>$row1[3]</td><td>$row1[4]</td>";
-          echo "<td><form method='POST' action='dashboard.php'>";
-          echo "<button name='articlesToShow1' value='$row1[0]'>Articles</button>";
-          echo "</form></td>";  
-          echo "<td><form method='POST' action='dashboard.php'>";
-          echo "<button name='multimediaToShow1' value='$row1[0]'>Multimedia</button>";
-          echo "</form></td>";
-          echo "</tr>";
         }
-      echo "</table>";
-
-     
-
-      ?>
-      </div>
-
-
-    <!--La section qui affiche le contenu d'un article--> 
-    <?php
-      $linkOfArticles=$_POST['articlesToShow1'];
-      $linkOfMultimedia=$_POST['multimediaToShow1'];
-        
-
-        if ($linkOfArticles!='hide'&&isset($linkOfArticles)){
-          $query="SELECT a.texte, a.url_piece_jointe from article a where a.lien = '$linkOfArticles';";
-
-          $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
-
-          echo "<h3>Contenu de l'article</h3>";
-          echo "<p>$row[0]</p>";
-          echo "<button value='like'>like</button> <button value='dislike'>dislike</button>";
-          echo "<button value='commenter'>Deposer un commentaire</button>";
-          echo "<br/>";
-          echo "<h3>URL relative a l'article</h3>";
-          echo "<p>$row[1]</p>";
-
-          echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<form method='POST' action='dashboard.php'>";
-        echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
-        echo "</form>";
-        }  
     ?>
-
-        <!--La section qui affiche le contenu multimedia--> 
-    <?php
-        if ($linkOfMultimedia!='hide'&&isset($linkOfMultimedia)){
-          $query="SELECT m.legende, m.url from multimedia m where m.lien = '$linkOfMultimedia';";
-
-          $result = pg_query($bddconn,$query);
-          $row=pg_fetch_array($result);
-
-          echo "<h3>Legende</h3>";
-          echo "<p>$row[0]</p>";      
-          echo "<button value='like'>like</button> <button value='dislike'>dislike</button>";
-          echo "<button value='commenter'>Deposer un commentaire</button>";
-          echo "<br/>";
-          echo "<h3>URL</h3>";
-          echo "<p>$row[1]</p>";
-
-          echo "<br/>";
-          echo "<br/>";
-          echo "<br/>";
-          echo "<form method='POST' action='dashboard.php'>";
-          echo "<button name='multimediaToShow' value='hide'>Cacher le contenu</button>";
-          echo "</form>";
-        }  
-/*
-***************************************
-*****Fin des publications d'autrui*****
-***************************************
-*/
-        
-    ?>
-    </div>
-
-
+ </div>
   </body>
 </html>
 

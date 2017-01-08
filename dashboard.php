@@ -25,14 +25,7 @@
     <h1 id="leTitre">Dashboard</h1>
 
 
-<?php
-/*
-************************************
-*****Insertion des commentaires*****
-************************************
-*/
-?>
-    <!--Insertion commentaire1 -->
+    <!--Insertion commentaire1 && vote -->
 <?php  
   //Variables pour commenter
     $lien_publi1 = $_POST['lienOnReview'];
@@ -113,6 +106,10 @@
     <!--Fin de l'affichage des Flux accessibles-->
 
 
+
+
+
+
     <!--La section qui affiche l'ensemble des publications relatives au flux de l'utilisateur-->  
     <div id="listePublications">
       <?php
@@ -127,14 +124,26 @@
 
         echo "<h2>$fluxSelectionneDashboard</h2>";
         
+
+        echo "<h3>Score</h3>";
+
         $query="SELECT p.lien, p.titre, p.date_publi, p.last_edit FROM publication p WHERE p.flux='$fluxSelectionneDashboard' AND p.etat<>'rejete' ORDER BY p.date_publi, p.titre;";
 
         $result = pg_query($bddconn, $query);
 
         echo "<table>";
-        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Derniere edition</th></tr>";
+        echo "<tr><th>Liens</th><th>Titre</th><th>Date de publication</th><th>Derniere edition</th><th>Score</th></tr>";
           while($row=pg_fetch_array($result)){
             echo "<tr align='center'> <td><a href='$row[0]' target='_blank'>$row[0]</a></td> <td>$row[1]</td> <td>$row[2]</td> <td>$row[3]</td> <td>$row[4]</td>";
+
+
+          $queryScore = "SELECT ps.sum from publi_score ps where ps.lien = '$row[0]';";
+          $resultScore = pg_query($bddconn,$queryScore);
+          
+          while($rowScore=pg_fetch_array($resultScore)){
+             echo "<td>$rowScore[0]</td>";
+          }
+
             echo "<td><form method='POST' action='dashboard.php'>";
             echo "<button name='reviews' value='$row[0]'>Reviews</button>"; 
             echo "</form></td></tr>";
@@ -142,9 +151,18 @@
         echo "</table>";
       }
 
+      //Je ne gère pas le tri par date ou score. Cele m'oblige à coller les tables 
       ?>
     </div>
     <!--Fin des publications d'un Flux accessibles-->
+
+
+
+
+
+
+
+
 
     <!--La section qui affiche les commentaires et les likes/dislikes--> 
     <?php
@@ -152,7 +170,7 @@
 
         if ($reviews!='hide'&&isset($reviews)){
 
-
+          //SCORE
           echo "<h3>Score</h3>";
 
           $query = "SELECT ps.sum from publi_score ps where ps.lien = '$reviews';";
@@ -172,10 +190,7 @@
 
 
 
-
-
-
-
+          //COMMENTAIRES
           echo "<h3>Commentaires liés</h3>";
 
           $query="SELECT c.email, c.datecomm, c.comm from commentaire c where c.lien_publi ='$reviews';";
@@ -208,7 +223,7 @@
 
 
 
-          //Boutton pour cacher les commentaires
+          //Boutton pour cacher la partie et donner la lisibilte
           echo "<br/>";
           echo "<br/>";
           echo "<br/>";

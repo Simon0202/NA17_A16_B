@@ -1,4 +1,3 @@
-
 DROP VIEW Publi_Score;
 DROP TABLE Utilisateur, Flux, Groupe_Utilisateur, Droits_Groupes_Flux, Publication, Lire, Compo_Groupe CASCADE;
 

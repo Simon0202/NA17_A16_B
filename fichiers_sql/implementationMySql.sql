@@ -1,4 +1,6 @@
-DROP TABLE Utilisateur, Flux, Groupe_Utilisateur, Droits_Groupes_Flux, Publication, Article, Multimedia, Lire, Compo_Groupe ;
+
+DROP VIEW Publi_Score;
+DROP TABLE Utilisateur, Flux, Groupe_Utilisateur, Droits_Groupes_Flux, Publication, Lire, Compo_Groupe CASCADE;
 
 CREATE TABLE Utilisateur(
 email VARCHAR(80) PRIMARY KEY,
@@ -6,7 +8,7 @@ nom VARCHAR(20) NOT NULL,
 prenom VARCHAR(20) NOT NULL,
 date_naissance DATE,
 entreprise VARCHAR(80),
-genre VARCHAR(20),
+genre VARCHAR(20) CHECK (genre = 'M' OR genre='F'),
 pays VARCHAR(20),
 metier VARCHAR(20)
 );
@@ -20,19 +22,19 @@ createur VARCHAR(80) NOT NULL REFERENCES Utilisateur(email)
 
 CREATE TABLE Groupe_Utilisateur(
 nom VARCHAR(20) PRIMARY KEY,
-email_admin VARCHAR(80) NOT NULL REFERENCES Utilisateur(email)
+email_admin VARCHAR(80) NOT NULL REFERENCES Utilisateur(email) ON DELETE CASCADE
 );
 
 CREATE TABLE Droits_Groupes_Flux(
-flux VARCHAR(80) REFERENCES flux(titre),
-nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
+flux VARCHAR(80) REFERENCES flux(titre) ON DELETE CASCADE,
+nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom) ON DELETE CASCADE,
 redacteur BOOLEAN,
 PRIMARY KEY (flux, nom)
 );
 
 CREATE TABLE Publication(
 lien VARCHAR(80) PRIMARY KEY,
-flux VARCHAR(80) NOT NULL REFERENCES  Flux(titre),
+flux VARCHAR(80) NOT NULL REFERENCES  Flux(titre) ON DELETE CASCADE,
 titre VARCHAR(80) NOT NULL,
 date_publi DATE NOT NULL,
 etat VARCHAR(20) CHECK (etat = 'valide' OR etat = 'rejete' OR etat = 'supprime'),
@@ -40,17 +42,23 @@ last_edit VARCHAR(80) REFERENCES Utilisateur(email)
 );
 
 CREATE TABLE Lire(
-lien_publi VARCHAR(80) REFERENCES Publication(lien),
-email VARCHAR(80) REFERENCES Utilisateur(email),
-nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
-PRIMARY KEY (lien_publi, email),
-vote VARCHAR(10) CHECK (vote='like' OR vote='dislike' OR vote='null'),
-commentaire VARCHAR(480)
+lien_publi VARCHAR(80) REFERENCES Publication(lien) ON DELETE CASCADE,
+email VARCHAR(80) REFERENCES Utilisateur(email) ON DELETE CASCADE,
+vote INTEGER CHECK (vote=1 OR vote=-1),
+PRIMARY KEY (lien_publi, email)
+);
+
+CREATE TABLE Commentaire(
+lien_publi VARCHAR(80) REFERENCES Publication(lien) ON DELETE CASCADE,
+email VARCHAR(80) REFERENCES Utilisateur(email) ON DELETE CASCADE,
+datecomm TIMESTAMP,
+comm VARCHAR(400),
+PRIMARY KEY(lien_publi,email,datecomm)
 );
 
 CREATE TABLE Compo_Groupe(
-email VARCHAR(80) REFERENCES Utilisateur(email),
-nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom),
+email VARCHAR(80) REFERENCES Utilisateur(email) ON DELETE CASCADE,
+nom VARCHAR(20) REFERENCES Groupe_Utilisateur(nom) ON DELETE CASCADE,
 PRIMARY KEY(email, nom)
 );
 
@@ -134,12 +142,22 @@ VALUES
 
 INSERT INTO Lire
 VALUES
-('www.avions/article.com','michel.durand@email.com','LecteurFlux1','like'),
-('www.avions/article.com','inconnu@email.com','LecteurFlux1','like'),
-('www.avions/article.com','inconnu2@email.com','LecteurFlux1','like'),
-('www.avions/article.com','inconnu3@email.com','LecteurFlux1','dislike'),
-('www.cplusplus.com','michel.durand@email.com','RedacteurFlux3','dislike')
+('www.avions/article.com','michel.durand@email.com',1),
+('www.avions/article.com','inconnu@email.com',1),
+('www.avions/article.com','inconnu2@email.com',1),
+('www.avions/article.com','inconnu3@email.com',-1),
+('www.cplusplus.com','michel.durand@email.com',-1)
 ;
+
+
+CREATE VIEW Publi_Score AS
+	SELECT p.flux, p.lien, SUM(l.vote) 
+	FROM publication p, Lire l
+	WHERE p.lien = l.lien_publi
+	GROUP BY p.lien
+	HAVING SUM(l.vote) > -1
+	;
+
 
 
 --DELETE FROM lire where lien_publi='www.avions/article.com' and email='michel.durand@email.com';

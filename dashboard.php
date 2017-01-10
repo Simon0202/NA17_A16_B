@@ -37,16 +37,8 @@
       $vote = $_POST['vote'];
       $emailVoter = $_POST['emailVoter'];
       $lienVoter = $_POST['lienVoter'];
-    /*echo "<br/>";
-    echo "'$lien_publi1'";
-    echo "<br/>";
-    echo "'$personEmail'";
-    echo "<br/>";
-    echo "'$personName'";
-    echo "<br/>";
-    echo "'$commentaire1'";
-    echo "<br/>";*/
 
+    //Commentaire
     require_once ('connect.php');
     if(isset($commentaire1,$dateOfReview,$emailReviewer,$lien_publi1)){
       $queryComm = "INSERT INTO commentaire(lien_publi, email, datecomm, comm) VALUES ('$lien_publi1','$emailReviewer','$dateOfReview', '$commentaire1');";
@@ -57,17 +49,10 @@
     echo "<i>Ajout reussi</i>";
     }
 
+    //Vote
     if(isset($lienVoter,$emailVoter,$vote)) {
 
-      echo "$lienVoter";
-      echo "<br>";
-      echo "$emailVoter";
-      echo "<br>";
-      echo "$vote";
-      echo "<br>";
-
-
-        $queryComm = "INSERT INTO lire VALUES ('$lien','$email','$vote');";
+      $queryComm = "INSERT INTO lire(lien_publi, email, vote) VALUES ('$lienVoter','$emailVoter',$vote);";
       $resultComm = pg_query($bddconn,$queryComm) or die('Échec de la requête : ' . pg_last_error());
 
     echo "<br/>";
@@ -139,10 +124,11 @@
 
           $queryScore = "SELECT ps.sum from publi_score ps where ps.lien = '$row[0]';";
           $resultScore = pg_query($bddconn,$queryScore);
-          
+            echo "<td>";
           while($rowScore=pg_fetch_array($resultScore)){
-             echo "<td>$rowScore[0]</td>";
+             echo "$rowScore[0]";
           }
+          "</td>";
 
             echo "<td><form method='POST' action='dashboard.php'>";
             echo "<button name='reviews' value='$row[0]'>Reviews</button>"; 

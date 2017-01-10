@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
   session_start();
   $mailSession = $_SESSION["emailUtilisateurCourant"];
 ?>
@@ -33,8 +34,13 @@
     $emailReviewer = $_POST['emailReviewer'];
     $commentaire1 = $_POST['commenter1'];
 
+    //Variables suppression Commentaire
+    $lienSuppComm = $_POST['lienSuppComm'];
+    $suppComm = $_POST['suppComm'];
+
     //Variable pour faire un vote
       $vote = $_POST['vote'];
+      var_dump($vote);
       $emailVoter = $_POST['emailVoter'];
       $lienVoter = $_POST['lienVoter'];
 
@@ -48,6 +54,17 @@
     echo "<br/>";
     echo "<i>Ajout reussi</i>";
     }
+
+    //Supprimer un commentaire
+    if(isset($lienSuppComm,$suppComm)){
+      $queryComm = "DELETE from commentaire where lien_publi='$lienSuppComm' and email='$mailSession' and datecomm='$suppComm';";
+      $resultComm = pg_query($bddconn,$queryComm) or die('Échec de la requête : ' . pg_last_error());
+
+    echo "<br/>";
+    echo "<br/>";
+    echo "<i>Suppression du commentaire reussi</i>";
+    }
+
 
     //Vote
     if(isset($lienVoter,$emailVoter,$vote)) {
@@ -179,7 +196,7 @@
           //COMMENTAIRES
           echo "<h3>Commentaires liés</h3>";
 
-          $query="SELECT c.email, c.datecomm, c.comm from commentaire c where c.lien_publi ='$reviews';";
+          $query="SELECT c.email, c.datecomm, c.comm, c.lien_publi from commentaire c where c.lien_publi ='$reviews';";
           $result = pg_query($bddconn,$query);
 
           echo "<table>";
@@ -187,7 +204,8 @@
           while($row=pg_fetch_array($result)){
             echo "<tr align='center'><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td>";
             echo "<td><form method='POST' action='dashboard.php'>";
-            echo "<button name='modifier' value='$row[1]'>Modifier</button>"; 
+            echo "<button name='suppComm' value='$row[1]'>-</button>";
+            echo "<input type='hidden' value='$row[3]' name='lienSuppComm'>";
             echo "</form></td></tr>";
           }
           echo "</table>";

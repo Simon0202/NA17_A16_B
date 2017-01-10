@@ -156,7 +156,7 @@
       if (isset($typeModif) && strcmp($typeModif, 'Modifier')==0){
 
 
-        $query = "UPDATE Publication SET titre='$titrePublication' WHERE lien='$lienPublication';";
+        $query = "UPDATE Publication SET titre='$titrePublication', date_publi=current_date, last_edit='$mailSession' WHERE lien='$lienPublication';";
         $result = pg_query($bddconn,$query);
         $test = "SELECT lien, titre FROM Publication WHERE lien='$lienPublication'";
         $result = pg_query($bddconn,$test);
